@@ -15,10 +15,11 @@ services:
         value: dist
       - key: KOTIVA_MAP_USER_AGENT
         value: kotiva/1.0 (route estimation; https://www.kotiva.fi)
+      - key: KOTIVA_CANONICAL_HOST
+        value: www.kotiva.fi
       - key: KOTIVA_REQUEST_ENDPOINT
         sync: false
       - key: GEMINI_API_KEY
         sync: false
     domains:
       - www.kotiva.fi
-      - kotiva.fi

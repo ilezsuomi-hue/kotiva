@@ -498,6 +498,13 @@ async function handleChat(req, res) {
 }
 
 const server = createServer(async (req, res) => {
+    const host = String(req.headers.host || '').split(':')[0].toLowerCase();
+    const canonicalHost = String(process.env.KOTIVA_CANONICAL_HOST || '').trim().toLowerCase();
+    if (canonicalHost && host === 'kotiva.fi' && host !== canonicalHost) {
+        res.writeHead(308, { Location: `https://${canonicalHost}${req.url}` });
+        return res.end();
+    }
+
     const path = new URL(req.url, 'http://localhost').pathname;
     if (path === '/api/config' && req.method === 'GET') {
         return json(res, 200, {
