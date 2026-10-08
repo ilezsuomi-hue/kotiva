@@ -1,0 +1,4085 @@
+/* =========================================================
+   PUHTOLA - STYLES
+
+   One light-first stylesheet. Every colour comes from a token
+   in :root, and the dark aurora look only overrides those tokens,
+   so the theme toggle can never leave a hard-coded colour behind.
+
+   Order matters: tokens, base, layout, components, then the
+   responsive and motion blocks at the end, where the last rule
+   with a given specificity wins.
+   ========================================================= */
+
+/* =========================================================
+   1. DESIGN TOKENS
+   ========================================================= */
+
+:root {
+    color-scheme: light;
+
+    /* Clean Nordic surfaces: porcelain, sea-glass and cool mineral. */
+    --bg: #f4f7f5;
+    --bg-glow-a: rgba(165, 203, 193, .30);
+    --bg-glow-b: rgba(218, 228, 224, .46);
+    --panel: rgba(252, 254, 253, .90);
+    --surface: #fbfdfc;
+    --surface-2: #edf3f1;
+    --surface-3: #dfeae7;
+
+    /* Petrol ink: calm, legible and trustworthy. */
+    --text: #1f3032;
+    --text-soft: #486268;
+    --muted: #708287;
+
+    /* Lichen + sea-glass accents. */
+    --line: rgba(48, 83, 89, .16);
+    --line-strong: rgba(48, 83, 89, .30);
+    --accent: #3f8b79;
+    --accent-bright: #75bda7;
+    --accent-ink: #ffffff;
+    --accent-soft: rgba(63, 139, 121, .12);
+    --accent-glow: rgba(84, 163, 143, .26);
+
+    /* semantic */
+    --ok: #438b67;
+    --ok-soft: rgba(67, 139, 103, .12);
+    --warn: #ac7d48;
+    --danger: #b75e62;
+    --danger-soft: rgba(183, 94, 98, .12);
+
+    /* Cool, soft premium elevation. */
+    --shadow-sm: 0 2px 10px rgba(31, 48, 50, .07);
+    --shadow-md: 0 14px 34px rgba(31, 48, 50, .11);
+    --shadow-lg: 0 28px 70px rgba(31, 48, 50, .16);
+    --ring: 0 0 0 3px rgba(63, 139, 121, .28);
+
+    --radius: 16px;
+    --ease: cubic-bezier(.2, .8, .2, 1);
+    --speed: .22s;
+}
+
+[data-theme="dark"] {
+    color-scheme: dark;
+
+    /* Deep petrol night: modern technology without neon sci-fi. */
+    --bg: #112229;
+    --bg-glow-a: rgba(66, 142, 125, .24);
+    --bg-glow-b: rgba(45, 91, 103, .34);
+    --panel: rgba(19, 38, 45, .88);
+    --surface: rgba(22, 43, 50, .95);
+    --surface-2: rgba(29, 57, 62, .82);
+    --surface-3: rgba(224, 244, 239, .08);
+
+    --text: #edf6f3;
+    --text-soft: #bdd2cf;
+    --muted: #8fa9a9;
+
+    --line: rgba(196, 225, 217, .20);
+    --line-strong: rgba(196, 225, 217, .36);
+    --accent: #79c1aa;
+    --accent-bright: #a9dfca;
+    --accent-ink: #12312e;
+    --accent-soft: rgba(121, 193, 170, .16);
+    --accent-glow: rgba(121, 193, 170, .26);
+
+    --ok: #8bc6a3;
+    --ok-soft: rgba(139, 198, 163, .14);
+    --warn: #d9b177;
+    --danger: #e3918a;
+    --danger-soft: rgba(227, 145, 138, .16);
+
+    --shadow-sm: 0 2px 10px rgba(3, 15, 20, .34);
+    --shadow-md: 0 14px 38px rgba(3, 15, 20, .44);
+    --shadow-lg: 0 30px 80px rgba(3, 15, 20, .56);
+    --ring: 0 0 0 3px rgba(121, 193, 170, .34);
+}
+
+/* =========================================================
+   2. BASE
+   ========================================================= */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+}
+
+body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    height: 100dvh;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, Helvetica, sans-serif;
+    color: var(--text);
+    background:
+        radial-gradient(ellipse at 14% 6%, var(--bg-glow-a), transparent 46%),
+        radial-gradient(ellipse at 88% 58%, var(--bg-glow-b), transparent 52%),
+        var(--bg);
+    background-attachment: fixed;
+    /* The bot is a screen, not a document: the page never scrolls and the
+       console scrolls inside itself, so the composer is always reachable. */
+    overflow: hidden;
+    transition: background-color .35s var(--ease), color .35s var(--ease);
+}
+
+button,
+input,
+select,
+textarea {
+    font-family: inherit;
+    color: inherit;
+}
+
+button {
+    cursor: pointer;
+    border: 0;
+    background: none;
+}
+
+:focus-visible {
+    outline: 2px solid var(--accent-bright);
+    outline-offset: 3px;
+}
+
+/* =========================================================
+   3. LAYOUT
+   ========================================================= */
+
+.app {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.brand-icon {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent-bright), var(--accent));
+    color: var(--accent-ink);
+    font-weight: 900;
+    letter-spacing: 1px;
+    box-shadow: var(--shadow-sm);
+}
+
+.brand-info {
+    min-width: 0;
+}
+
+.brand-name {
+    font-size: 17px;
+    font-weight: 900;
+    letter-spacing: 3px;
+}
+
+.brand-subtitle {
+    margin-top: 3px;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--muted);
+}
+
+/* The old top-bar actions, right-aligned inside the console bar. */
+
+.console-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+}
+
+.online-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--ok);
+    white-space: nowrap;
+}
+
+.online-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 12px currentColor;
+}
+
+.main {
+    display: flex;
+    flex: 1;
+    justify-content: flex-end;
+    min-height: 0;
+    /* Empty space around the floating console must reach the 3D canvas,
+       so orbiting and zooming Puhto still works. */
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* =========================================================
+   4. STAGE + TELEMETRY
+   ========================================================= */
+
+/* The robot is the full-page Aibot background: the canvas always fills the
+   viewport and every menu floats above it, so the visitor never leaves
+   the Aibot screen. Brand bar top-left, camera menu top-right, hint
+   bottom-left, and the booking console docked bottom-right. */
+
+.robot-section {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    /* The pills need mouse events, but empty stage space must let the
+       visitor orbit and zoom Puhto. */
+    pointer-events: none;
+}
+
+.robot-container {
+    position: absolute;
+    inset: 0;
+    pointer-events: auto;
+}
+
+.robot-container canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* Floating menus over the Aibot background: the brand pill docks top-left,
+   the camera pill top-right, and the hint bottom-left clear of the
+   bottom-right booking console. Empty stage space stays orbitable. */
+
+.stage-hud {
+    position: absolute;
+    z-index: 3;
+    display: flex;
+    pointer-events: none;
+}
+
+.stage-hud--hint {
+    display: none;
+}
+
+.start-overlay {
+    position: absolute;
+    inset: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+        env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+    z-index: 4;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+}
+
+.start-note {
+    position: absolute;
+    top: calc(53% + 38px);
+    left: 50%;
+    width: max-content;
+    max-width: calc(100vw - 32px);
+    margin: 0;
+    transform: translateX(-50%);
+    color: var(--text-soft);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1.3px;
+    text-align: center;
+    text-shadow: 0 1px 8px rgba(255, 255, 255, .65);
+}
+
+.start-button {
+    position: absolute;
+    top: 53%;
+    left: 50%;
+    min-width: 210px;
+    min-height: 56px;
+    padding: 15px 24px;
+    pointer-events: auto;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transform: translate(-50%, -50%);
+    color: var(--accent-ink);
+    background: linear-gradient(135deg, var(--accent-bright), var(--accent));
+    border: 1px solid rgba(255, 255, 255, .42);
+    border-radius: 999px;
+    box-shadow: 0 14px 34px var(--accent-glow), 0 0 0 8px rgba(63, 139, 121, .08);
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 1.8px;
+    transition: transform var(--speed) var(--ease), box-shadow var(--speed) var(--ease), filter var(--speed) var(--ease);
+}
+
+.start-button:hover {
+    transform: translate(-50%, calc(-50% - 2px));
+    filter: brightness(1.06);
+    box-shadow: 0 18px 40px var(--accent-glow), 0 0 0 10px rgba(63, 139, 121, .12);
+}
+
+.start-button:active {
+    transform: translate(-50%, -50%) scale(.98);
+}
+
+.start-button:focus-visible {
+    outline: 3px solid var(--accent-bright);
+    outline-offset: 6px;
+    box-shadow: 0 18px 40px var(--accent-glow), 0 0 0 10px rgba(63, 139, 121, .16);
+}
+
+body[data-app-state="request"] .start-overlay {
+    display: none;
+}
+
+body[data-app-state="request"] .conversation,
+body[data-app-state="request"] .console-dock {
+    display: none;
+}
+
+body[data-app-state="request"] .console-window {
+    max-height: calc(100dvh - 36px);
+}
+
+.stage-hud--bar {
+    top: calc(14px + env(safe-area-inset-top, 0px));
+    left: calc(14px + env(safe-area-inset-left, 0px));
+    right: auto;
+    justify-content: flex-start;
+    width: max-content;
+    max-width: min(430px, calc(50vw - 24px));
+}
+
+/* Brand and hint overlays remain lightweight; the camera/telemetry menu was
+   intentionally removed so the robot scene stays visually clean. */
+
+.stage-hint {
+    margin: 0;
+    padding: 8px 12px;
+    pointer-events: auto;
+    font-size: 11px;
+    letter-spacing: .4px;
+    color: var(--text-soft);
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: blur(14px);
+}
+
+.eco-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 26px;
+    padding: 5px 8px;
+    color: var(--ok);
+    background: var(--ok-soft);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+.eco-badge span {
+    font-size: 13px;
+    line-height: 1;
+}
+
+.stage-pill {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    max-width: 100%;
+    padding: 10px 14px;
+    pointer-events: auto;
+    color: var(--text);
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(18px);
+}
+
+.stage-pill .console-dots {
+    flex: none;
+}
+
+.stage-hud--bar .stage-pill {
+    max-width: min(430px, 100%);
+}
+
+.stage-hud--bar .brand-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+.stage-hud--bar .brand-name {
+    font-size: 15px;
+    letter-spacing: 2px;
+}
+
+.stage-hud--bar .brand-subtitle {
+    margin-top: 2px;
+    font-size: 8px;
+    letter-spacing: 1.5px;
+}
+
+/* =========================================================
+   5. ASSISTANT PANEL + CONSOLE
+   ========================================================= */
+
+/* The Aibot screen is the page background. This console only holds the
+   booking workspace and floats bottom-right above the robot, so every
+   menu stays on the same full-page view. */
+
+.assistant-panel {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex: none;
+    align-items: flex-end;
+    justify-content: flex-end;
+    width: clamp(430px, 42vw, 520px);
+    min-width: 0;
+    min-height: 0;
+    margin-left: auto;
+    padding: 18px;
+    overflow: visible;
+    background: transparent;
+    border-left: 0;
+    /* The panel wrapper only positions the floating console: the console
+       itself restores pointer events below. */
+    pointer-events: none;
+}
+
+.console-window {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    max-height: calc(100dvh - 118px);
+    overflow: hidden;
+    pointer-events: auto;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(20px);
+    transition: background-color .35s var(--ease), border-color .35s var(--ease);
+}
+
+/* The wizard progress opens the booking console: only the dots are shared
+   with the floating brand pill on the Aibot stage. */
+
+.console-dots {
+    display: flex;
+    gap: 5px;
+}
+
+.console-dots i {
+    width: 8px;
+    height: 8px;
+    background: var(--line-strong);
+    border-radius: 50%;
+}
+
+.console-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 14px;
+    min-height: 0;
+    padding: 18px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+}
+
+/* The conversation sits above the scrolling workspace, so Puhto's answer
+   and the visitor's question are never scrolled out of sight. */
+
+.conversation {
+    display: flex;
+    flex: 0 1 auto;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+    max-height: 44%;
+    padding: 16px 18px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+}
+
+/* Docked footer: service quick picks, voice controls, composer and the live
+   status line - everything the visitor acts with stays on screen. */
+
+.console-dock {
+    flex: none;
+    padding: 14px 16px calc(14px + env(safe-area-inset-bottom, 0px));
+    background: var(--surface-2);
+    border-top: 1px solid var(--line);
+    border-radius: 0 0 21px 21px;
+}
+
+/* =========================================================
+   6. SPEECH BUBBLE
+   ========================================================= */
+
+.speech-card {
+    position: relative;
+    padding: 18px 20px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+}
+
+.assistant-message {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text);
+    overflow-wrap: anywhere;
+}
+
+.assistant-message:empty {
+    display: none;
+}
+
+.assistant-message.is-streaming::after {
+    content: "";
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    margin-left: 3px;
+    vertical-align: text-bottom;
+    background: var(--accent);
+    animation: caret 1s steps(2, jump-none) infinite;
+}
+
+@keyframes caret {
+    50% { opacity: 0; }
+}
+
+/* The visitor's question reads as a chat bubble on the right, Puhto's
+   answer stays in the speech card below it. An empty line is hidden, so
+   the first view is just Puhto's welcome. */
+
+.user-message {
+    align-self: flex-end;
+    max-width: 88%;
+    padding: 9px 13px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-soft);
+    background: var(--surface-3);
+    border: 1px solid var(--line);
+    border-radius: 14px 14px 4px 14px;
+    overflow-wrap: anywhere;
+    animation: wizard-in .28s var(--ease) both;
+}
+
+.user-message:empty {
+    display: none;
+}
+
+/* =========================================================
+   7. SERVICES
+   ========================================================= */
+
+.service-panel {
+    margin-top: 2px;
+}
+
+.panel-title {
+    margin-bottom: 10px;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: var(--text-soft);
+}
+
+.eco-proof {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 12px;
+    padding: 8px 10px;
+    color: var(--text-soft);
+    background: color-mix(in srgb, var(--ok-soft) 72%, var(--surface) 28%);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    font-size: 10px;
+    line-height: 1.35;
+}
+
+.eco-proof-icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    color: var(--ok);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    font-size: 13px;
+}
+
+.service-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.service-button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 72px;
+    padding: 12px;
+    overflow: hidden;
+    text-align: left;
+    color: var(--text);
+    background: color-mix(in srgb, var(--surface) 92%, var(--surface-2));
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--speed) var(--ease), border-color var(--speed) var(--ease),
+        background-color var(--speed) var(--ease), box-shadow var(--speed) var(--ease);
+}
+
+.service-button::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle at 50% 0%, var(--accent-glow), transparent 70%);
+    opacity: 0;
+    transition: opacity .3s ease;
+    pointer-events: none;
+}
+
+.service-button:hover {
+    transform: translateY(-2px);
+    border-color: var(--line-strong);
+    box-shadow: var(--shadow-md);
+}
+
+.service-button:hover::before {
+    opacity: .5;
+}
+
+.service-icon {
+    flex: none;
+    font-size: 25px;
+    transition: transform .25s var(--ease);
+}
+
+.service-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.service-content strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.service-content small {
+    display: block;
+    margin-top: 5px;
+    font-size: 11px;
+    color: var(--muted);
+}
+
+/* Starting price on every card: the number is the selling point,
+   so it gets its own accent-coloured line. */
+
+.service-price {
+    display: block;
+    margin-top: 6px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: var(--accent);
+}
+
+.service-arrow {
+    flex: none;
+    margin-left: auto;
+    font-size: 16px;
+    line-height: 1;
+    color: var(--accent);
+    opacity: .6;
+    transition: transform var(--speed) var(--ease), opacity var(--speed) var(--ease);
+}
+
+.service-button:hover .service-arrow {
+    transform: translateX(3px);
+    opacity: 1;
+}
+
+/* The chosen service stays visible and clearly framed. */
+
+.service-button.selected {
+    transform: translateY(-2px);
+    color: var(--accent-ink);
+    background: linear-gradient(135deg, var(--accent-bright), var(--accent));
+    border-color: transparent;
+    box-shadow: 0 12px 26px var(--accent-glow);
+}
+
+.service-button.selected::before {
+    opacity: 0;
+}
+
+.service-button.selected .service-content small,
+.service-button.selected .service-arrow,
+.service-button.selected .service-price {
+    color: var(--accent-ink);
+    opacity: .85;
+}
+
+.service-button.selected .service-icon {
+    transform: scale(1.12);
+}
+
+/* The pick is confirmed in the corner, so the state never relies on the
+   gradient alone. */
+
+.service-button.selected::after {
+    content: "✓";
+    position: absolute;
+    top: 8px;
+    right: 11px;
+    font-size: 13px;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--accent-ink);
+    opacity: .9;
+}
+
+/* =========================================================
+   8. BOOKING
+   ========================================================= */
+
+.booking-panel {
+    margin-top: 10px;
+    padding: 18px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+}
+
+.booking-panel label {
+    display: block;
+    margin: 11px 0 6px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+}
+
+.booking-panel input,
+.booking-panel select,
+.booking-panel textarea {
+    width: 100%;
+    height: 44px;
+    padding: 0 12px;
+    font-size: 16px;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    outline: none;
+    transition: border-color var(--speed) var(--ease), box-shadow var(--speed) var(--ease);
+}
+
+.booking-panel textarea {
+    height: auto;
+    padding: 12px;
+    font-size: 15px;
+    line-height: 1.5;
+    resize: vertical;
+}
+
+.booking-panel input:focus,
+.booking-panel select:focus,
+.booking-panel textarea:focus {
+    border-color: var(--accent);
+    box-shadow: var(--ring);
+}
+
+.booking-panel input[readonly] {
+    background: var(--surface-3);
+    color: var(--text-soft);
+}
+
+.booking-panel textarea::placeholder {
+    color: var(--muted);
+    opacity: .75;
+}
+
+/* Honeypot: pulled out of the flow and out of reach, but still a real
+   field for a bot to fill in. */
+
+.honeypot {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+/* =========================================================
+   9. CONTROLS
+   ========================================================= */
+
+.controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+/* Inside the dock the controls own their spacing, so the quick rail above
+   them decides the gap instead. */
+
+.console-dock .controls {
+    margin-top: 0;
+}
+
+.console-dock .mic-status {
+    margin-top: 8px;
+}
+
+/* SERVICE QUICK PICK - the four services as pills, right above the composer,
+   so the choice can be changed from any booking step without scrolling. */
+
+.quick-rail {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 12px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.quick-rail::-webkit-scrollbar {
+    display: none;
+}
+
+.quick-label {
+    flex: none;
+    margin-right: 2px;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: var(--muted);
+}
+
+.quick-chip {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 6px;
+    min-height: 34px;
+    padding: 0 13px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .3px;
+    white-space: nowrap;
+    color: var(--text-soft);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    transition: color var(--speed) var(--ease), border-color var(--speed) var(--ease),
+        background var(--speed) var(--ease), box-shadow var(--speed) var(--ease),
+        transform var(--speed) var(--ease);
+}
+
+.quick-chip:hover {
+    color: var(--accent);
+    border-color: var(--line-strong);
+    transform: translateY(-1px);
+}
+
+.quick-chip.selected {
+    color: var(--accent-ink);
+    background: linear-gradient(135deg, var(--accent-bright), var(--accent));
+    border-color: transparent;
+    box-shadow: 0 6px 16px var(--accent-glow);
+}
+
+.quick-icon {
+    font-size: 13px;
+    line-height: 1;
+}
+
+.mic-button {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 52px;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--accent-bright), var(--accent));
+    border-radius: 14px;
+    box-shadow: 0 8px 22px var(--accent-glow);
+    transition: filter var(--speed) var(--ease), transform var(--speed) var(--ease),
+        background var(--speed) var(--ease);
+}
+
+.mic-button:hover {
+    filter: brightness(1.06);
+}
+
+.mic-button.listening {
+    background: linear-gradient(135deg, #ff5f72, #ff9a61);
+    animation: micPulse 1.1s infinite;
+}
+
+@keyframes micPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 95, 114, .45); }
+    50% { box-shadow: 0 0 26px 6px rgba(255, 95, 114, .28); }
+}
+
+.secondary-button {
+    height: 52px;
+    padding: 0 20px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    color: var(--text-soft);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: var(--shadow-sm);
+    transition: background-color var(--speed) var(--ease), color var(--speed) var(--ease),
+        border-color var(--speed) var(--ease);
+}
+
+.secondary-button:hover {
+    color: var(--accent);
+    border-color: var(--line-strong);
+}
+
+.mic-status {
+    min-height: 14px;
+    margin-top: 10px;
+    font-size: 11px;
+    text-align: center;
+    color: var(--muted);
+}
+
+.mic-status.is-ai {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+/* =========================================================
+   10. TEXT CHAT
+   ========================================================= */
+
+.chat-row {
+    display: flex;
+    gap: 8px;
+}
+
+.chat-row input {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 14px;
+    font-size: 16px;
+    color: var(--text);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    outline: none;
+    transition: border-color var(--speed) var(--ease), box-shadow var(--speed) var(--ease);
+}
+
+.chat-row input:focus {
+    border-color: var(--accent);
+    box-shadow: var(--ring);
+}
+
+.chat-row input::placeholder {
+    color: var(--muted);
+    opacity: .75;
+}
+
+.send-button {
+    padding: 12px 18px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--accent-bright), var(--accent));
+    border-radius: 12px;
+    box-shadow: 0 6px 18px var(--accent-glow);
+    transition: filter var(--speed) var(--ease), transform var(--speed) var(--ease);
+}
+
+.send-button:hover {
+    filter: brightness(1.07);
+}
+
+/* =========================================================
+   11. WIZARD
+   ========================================================= */
+
+.wizard-steps {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 2px 0 14px;
+}
+
+/* Pinned directly under the console bar, so the progress is part of the
+   header instead of scrolling away with the feed. */
+
+.console-window > .wizard-steps {
+    flex: none;
+    margin: 0;
+    padding: 11px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+}
+
+.wizard-step {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+    padding: 8px 10px;
+    overflow: hidden;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    white-space: nowrap;
+    color: var(--muted);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    transition: color var(--speed) var(--ease), background-color var(--speed) var(--ease),
+        border-color var(--speed) var(--ease);
+}
+
+.wizard-step i {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 900;
+    letter-spacing: 0;
+    background: var(--surface-3);
+    border-radius: 50%;
+    transition: background-color var(--speed) var(--ease), color var(--speed) var(--ease);
+}
+
+.wizard-step.active {
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-color: var(--line-strong);
+}
+
+.wizard-step.active i {
+    color: var(--accent-ink);
+    background: var(--accent);
+}
+
+.wizard-step.done {
+    color: var(--ok);
+    background: var(--ok-soft);
+    border-color: transparent;
+}
+
+.wizard-step.done i {
+    color: #fff;
+    background: var(--ok);
+}
+
+.wizard-pane {
+    animation: wizard-in .32s var(--ease) both;
+}
+
+@keyframes wizard-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(.99);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.wizard-nav {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.wizard-nav .confirm-button {
+    flex: 1;
+    width: auto;
+    margin-top: 0;
+}
+
+.wizard-back {
+    height: 46px;
+    padding: 0 16px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    transition: color var(--speed) var(--ease), border-color var(--speed) var(--ease),
+        transform var(--speed) var(--ease);
+}
+
+.wizard-back:hover {
+    color: var(--accent);
+    border-color: var(--line-strong);
+    transform: translateY(-1px);
+}
+
+/* =========================================================
+   12. BUTTONS
+   ========================================================= */
+
+.confirm-button {
+    width: 100%;
+    height: 46px;
+    margin-top: 16px;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--accent-bright), var(--accent));
+    border-radius: 12px;
+    box-shadow: 0 8px 20px var(--accent-glow);
+    transition: filter var(--speed) var(--ease), transform var(--speed) var(--ease);
+}
+
+.confirm-button:hover {
+    filter: brightness(1.07);
+}
+
+/* =========================================================
+   13. CONFIRMATION CARD (inline, not a modal)
+   ========================================================= */
+
+.confirmation {
+    display: block;
+}
+
+.confirmation-card {
+    width: 100%;
+    padding: 24px;
+    text-align: center;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    animation: wizard-in .34s var(--ease) both;
+}
+
+.success-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    margin: 0 auto 14px;
+    font-size: 26px;
+    font-weight: 900;
+    color: #fff;
+    background: var(--ok);
+    border-radius: 50%;
+    box-shadow: 0 8px 20px var(--ok-soft);
+}
+
+.confirmation-card h2 {
+    margin-bottom: 12px;
+    font-size: 18px;
+    font-weight: 900;
+}
+
+.confirmation-card p {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-soft);
+    overflow-wrap: anywhere;
+}
+
+/* =========================================================
+   14. AI STATUS + THEME
+   ========================================================= */
+
+.ai-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    max-width: 100%;
+    padding: 5px 11px;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    white-space: nowrap;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+}
+
+.ai-badge .dot {
+    flex: none;
+    width: 7px;
+    height: 7px;
+    background: currentColor;
+    border-radius: 50%;
+    box-shadow: 0 0 10px currentColor;
+}
+
+.ai-badge.is-offline {
+    color: var(--muted);
+}
+
+.ai-badge.is-busy .dot {
+    animation: caret .8s steps(2, jump-none) infinite;
+}
+
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    font-size: 17px;
+    line-height: 1;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--speed) var(--ease), border-color var(--speed) var(--ease);
+}
+
+.theme-toggle:hover {
+    transform: translateY(-1px) rotate(-8deg);
+    border-color: var(--line-strong);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* =========================================================
+   15. TOUCH, FOCUS AND MOTION PREFERENCES
+   ========================================================= */
+
+.service-button,
+.mic-button,
+.secondary-button,
+.send-button,
+.confirm-button,
+.wizard-back,
+.theme-toggle {
+    min-height: 44px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.service-button:active,
+.mic-button:active,
+.secondary-button:active,
+.send-button:active,
+.confirm-button:active,
+.wizard-back:active,
+.theme-toggle:active {
+    transform: scale(.985);
+}
+
+.service-button.selected:active {
+    transform: translateY(-2px) scale(.99);
+}
+
+.quick-chip {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.quick-chip:active {
+    transform: scale(.97);
+}
+
+/* Fat fingers get a full-size pill without bloating the desktop rail. */
+
+@media (pointer: coarse) {
+
+    .quick-chip {
+        min-height: 44px;
+        padding: 0 15px;
+    }
+
+}
+
+/* Hover effects only apply where a real pointer exists. */
+
+@media (hover: none) {
+
+    .service-button:hover,
+    .service-button.selected {
+        transform: none;
+    }
+
+    .service-button:hover::before {
+        opacity: 0;
+    }
+
+    .service-button.selected::before {
+        opacity: 0;
+    }
+
+    .service-button:hover .service-arrow {
+        transform: none;
+        opacity: .6;
+    }
+
+    .mic-button:hover {
+        filter: none;
+    }
+
+    .quick-chip:hover {
+        color: var(--text-soft);
+        border-color: var(--line);
+        transform: none;
+    }
+
+    .wizard-back:hover {
+        transform: none;
+    }
+
+    .theme-toggle:hover {
+        transform: none;
+    }
+}
+
+@media (max-width: 900px) {
+
+    .start-button {
+        top: 52%;
+        min-width: min(230px, calc(100vw - 48px));
+        min-height: 54px;
+        font-size: 11px;
+    }
+
+    .start-note {
+        top: calc(52% + 37px);
+        font-size: 8px;
+        letter-spacing: 1px;
+    }
+
+    body[data-app-state="request"] .console-window {
+        max-height: calc(100dvh - 84px);
+    }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .001ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .wizard-pane,
+    .confirmation-card {
+        animation: none;
+    }
+
+    .start-button,
+    .start-button:hover,
+    .start-button:active {
+        transform: translate(-50%, -50%);
+        transition: none;
+    }
+
+}
+
+/* =========================================================
+   16. RESPONSIVE
+   ========================================================= */
+
+/* --- tablet + phone: one column, sticky top bar --- */
+
+@media (max-width: 900px) {
+
+    /* The Aibot screen stays the background on a phone too: the booking
+       console docks bottom-right above it and the menus stay floating. */
+
+    .main {
+        align-items: flex-end;
+    }
+
+    .assistant-panel {
+        width: 100%;
+        align-items: stretch;
+        padding:
+            0
+            calc(12px + env(safe-area-inset-right, 0px))
+            calc(12px + env(safe-area-inset-bottom, 0px))
+            calc(12px + env(safe-area-inset-left, 0px));
+        border-left: 0;
+    }
+
+    .stage-hud--bar {
+        top: calc(10px + env(safe-area-inset-top, 0px));
+        left: calc(10px + env(safe-area-inset-left, 0px));
+        max-width: calc(100% - 20px);
+    }
+
+    .stage-hud--hint {
+        display: none;
+    }
+
+    .stage-pill {
+        width: 100%;
+        padding: 8px 10px;
+        gap: 6px 8px;
+    }
+
+    .console-window {
+        max-height: calc(100dvh - 168px);
+        border-radius: 18px;
+    }
+
+    .console-window > .wizard-steps {
+        padding: 9px 14px;
+    }
+
+    .conversation {
+        max-height: 46%;
+        padding: 14px;
+    }
+
+    .console-body {
+        gap: 12px;
+        padding: 14px;
+    }
+
+    .console-dock {
+        padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
+        border-radius: 0 0 17px 17px;
+    }
+
+    .speech-card {
+        padding: 15px;
+    }
+
+    .booking-panel {
+        padding: 15px;
+    }
+
+    .service-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .service-button {
+        min-height: 78px;
+        padding: 10px;
+        gap: 9px;
+    }
+
+    .service-icon {
+        font-size: 22px;
+    }
+
+    .service-content strong {
+        font-size: 12px;
+    }
+
+    .service-content small {
+        margin-top: 3px;
+        font-size: 11px;
+    }
+
+}
+
+/* --- narrow screens --- */
+
+@media (max-width: 560px) {
+
+    .stage-pill {
+        border-radius: 14px;
+    }
+
+    /* A phone fits one pane at a time: while the booking form is open the
+       pinned conversation keeps only its latest reply, so the fields the
+       visitor came to fill in get the rest of the screen. */
+
+    [data-booking] .conversation {
+        max-height: min(140px, 26%);
+    }
+
+}
+
+/* --- small phones --- */
+
+@media (max-width: 500px) {
+
+    .assistant-panel {
+        padding-left: calc(10px + env(safe-area-inset-left, 0px));
+        padding-right: calc(10px + env(safe-area-inset-right, 0px));
+    }
+
+    .console-window {
+        max-height: calc(100dvh - 158px);
+    }
+
+    .wizard-steps {
+        gap: 5px;
+    }
+
+    .wizard-step {
+        padding: 7px;
+        gap: 5px;
+        font-size: 8px;
+        letter-spacing: 1px;
+    }
+
+    .wizard-step i {
+        width: 16px;
+        height: 16px;
+        font-size: 9px;
+    }
+
+    .wizard-nav {
+        gap: 6px;
+    }
+
+    .wizard-back {
+        padding: 0 12px;
+        letter-spacing: 1px;
+    }
+
+    .brand-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        font-size: 13px;
+    }
+
+    .brand-name {
+        font-size: 14px;
+        letter-spacing: 2px;
+    }
+
+    .brand-subtitle {
+        font-size: 8px;
+        letter-spacing: 1px;
+    }
+
+    .online-status {
+        font-size: 9px;
+        letter-spacing: 1px;
+    }
+
+    /* All four services stay visible: two cards per row. */
+
+    .service-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .service-button {
+        min-height: 62px;
+        padding: 10px;
+        gap: 8px;
+    }
+
+    /* The arrow only costs width on a narrow card. */
+    .service-arrow {
+        display: none;
+    }
+
+    .assistant-message {
+        font-size: 14px;
+    }
+
+    /* The dock never stacks: the composer would be pushed off screen. */
+
+    .controls {
+        gap: 7px;
+    }
+
+    .mic-button {
+        gap: 7px;
+        height: 46px;
+        padding: 0 10px;
+        font-size: 12px;
+    }
+
+    .secondary-button {
+        height: 46px;
+        padding: 0 12px;
+        font-size: 12px;
+    }
+
+    .send-button {
+        padding: 12px 14px;
+        letter-spacing: 1px;
+    }
+
+}
+
+@media (max-width: 430px) {
+
+    .brand-subtitle {
+        display: none;
+    }
+
+    .ai-badge {
+        padding: 6px;
+    }
+
+    .ai-badge span {
+        display: none;
+    }
+
+    .theme-toggle {
+        width: 36px;
+        height: 36px;
+        font-size: 15px;
+    }
+
+    /* Emoji-only helper buttons: the microphone keeps its label. */
+
+    .secondary-button {
+        width: 46px;
+        padding: 0;
+    }
+
+    .secondary-button .btn-txt {
+        display: none;
+    }
+
+}
+
+/* --- phone on its side: keep the stage from eating the screen --- */
+
+@media (max-width: 900px) and (max-height: 520px) {
+
+    .start-button {
+        top: 50%;
+    }
+
+    .conversation {
+        max-height: 42%;
+    }
+
+    .quick-rail {
+        display: none;
+    }
+
+}
+
+/* --- desktop: wider console, roomier padding --- */
+
+@media (min-width: 1280px) {
+
+    .assistant-panel {
+        width: clamp(470px, 38vw, 580px);
+        padding: 22px 24px;
+    }
+
+}
+
+/* --- large desktop --- */
+
+@media (min-width: 1700px) {
+
+    .assistant-panel {
+        width: clamp(540px, 36vw, 660px);
+    }
+
+    .assistant-message {
+        font-size: 16px;
+    }
+
+    .service-button {
+        min-height: 80px;
+    }
+
+}
+
+/* --- short windows: hand the height back to the scrolling workspace --- */
+
+@media (max-height: 660px) {
+
+    .quick-rail {
+        display: none;
+    }
+
+    .conversation {
+        max-height: 38%;
+    }
+
+    .console-window > .wizard-steps {
+        padding-top: 8px;
+        padding-bottom: 8px;
+    }
+
+    .console-dock {
+        padding-top: 10px;
+        padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .mic-status {
+        margin-top: 6px;
+        font-size: 10px;
+    }
+
+}
+
+/* =========================================================
+   17. MOBILE-FIRST VISUAL REFRESH
+   =========================================================
+
+   Phones use the assistant as the primary product surface. The robot stays
+   as a quiet brand layer, while the booking form gets the height, contrast,
+   and touch space it needs. Desktop keeps the immersive stage unchanged.
+   ========================================================= */
+
+:root {
+    --radius: 18px;
+}
+
+.service-button,
+.booking-panel,
+.speech-card,
+.confirmation-card {
+    border-radius: var(--radius);
+}
+
+.service-button:focus-visible,
+.quick-chip:focus-visible,
+.mic-button:focus-visible,
+.secondary-button:focus-visible,
+.send-button:focus-visible,
+.confirm-button:focus-visible,
+.wizard-back:focus-visible {
+    box-shadow: var(--ring), var(--shadow-sm);
+}
+
+.booking-panel {
+    box-shadow: var(--shadow-sm);
+}
+
+.booking-panel input,
+.booking-panel select,
+.booking-panel textarea,
+.chat-row input {
+    min-height: 48px;
+}
+
+@media (max-width: 900px) {
+
+    body {
+        background:
+            radial-gradient(circle at 15% 0%, var(--bg-glow-a), transparent 42%),
+            linear-gradient(180deg, var(--bg) 0%, var(--surface-2) 100%);
+    }
+
+    .main {
+        align-items: stretch;
+    }
+
+    /* Let the robot remain part of the mobile composition instead of
+       disappearing behind an opaque booking sheet. */
+    .robot-container {
+        opacity: .38;
+        pointer-events: none;
+    }
+
+    .robot-container canvas {
+        filter: saturate(.92) contrast(1.02) brightness(.98);
+    }
+
+    .stage-hud--hint,
+    .theme-toggle {
+        display: none;
+    }
+
+    .stage-hud--bar {
+        top: calc(8px + env(safe-area-inset-top, 0px));
+        left: calc(12px + env(safe-area-inset-left, 0px));
+        right: calc(12px + env(safe-area-inset-right, 0px));
+        width: auto;
+        max-width: none;
+    }
+
+    .stage-hud--bar .stage-pill {
+        width: 100%;
+        min-height: 54px;
+        padding: 7px 10px;
+        border-color: transparent;
+        background: color-mix(in srgb, var(--surface) 76%, transparent);
+        box-shadow: var(--shadow-sm);
+        backdrop-filter: blur(18px);
+    }
+
+    .assistant-panel {
+        width: 100%;
+        height: 100%;
+        padding: calc(74px + env(safe-area-inset-top, 0px))
+            calc(10px + env(safe-area-inset-right, 0px))
+            calc(10px + env(safe-area-inset-bottom, 0px))
+            calc(10px + env(safe-area-inset-left, 0px));
+    }
+
+    .console-window {
+        width: 100%;
+        height: 100%;
+        max-height: none;
+        border-radius: 24px;
+        box-shadow: 0 18px 55px rgba(8, 66, 58, .16);
+    }
+
+    .console-window > .wizard-steps {
+        padding: 10px 12px;
+    }
+
+    .wizard-step {
+        min-height: 42px;
+        padding: 7px 8px;
+        font-size: 9px;
+        letter-spacing: 1px;
+    }
+
+    .conversation {
+        max-height: clamp(112px, 22vh, 180px);
+        padding: 12px 14px;
+    }
+
+    .speech-card {
+        padding: 14px 15px;
+    }
+
+    .assistant-message {
+        font-size: 14px;
+        line-height: 1.52;
+    }
+
+    .console-body {
+        padding: 14px;
+        scroll-padding-block: 16px;
+    }
+
+    .console-dock {
+        padding: 11px 12px calc(11px + env(safe-area-inset-bottom, 0px));
+        border-radius: 0 0 23px 23px;
+    }
+
+    .quick-rail {
+        margin: 0 -2px 10px;
+        padding: 0 2px 2px;
+    }
+
+    .quick-chip {
+        min-height: 42px;
+    }
+
+    .controls {
+        gap: 8px;
+        margin-top: 0;
+    }
+
+    .mic-button,
+    .secondary-button {
+        height: 48px;
+    }
+
+    .chat-row {
+        gap: 7px;
+        margin-top: 9px;
+    }
+
+    .send-button {
+        min-width: 84px;
+        padding-inline: 13px;
+    }
+
+    .service-grid {
+        gap: 9px;
+    }
+
+    .service-button {
+        min-height: 78px;
+        padding: 13px;
+    }
+
+    .booking-panel {
+        padding: 16px;
+    }
+
+    .booking-panel label {
+        margin-top: 13px;
+    }
+
+    .wizard-nav {
+        position: sticky;
+        bottom: -1px;
+        z-index: 1;
+        padding-top: 10px;
+        background: linear-gradient(180deg, transparent, var(--surface-2) 30%);
+    }
+
+}
+
+@media (max-width: 520px) {
+
+    .brand-info {
+        display: block;
+    }
+
+    .console-actions {
+        gap: 6px;
+    }
+
+    .online-status,
+    .theme-toggle {
+        display: none;
+    }
+
+    .wizard-step {
+        justify-content: center;
+        gap: 5px;
+        padding-inline: 5px;
+        letter-spacing: .8px;
+    }
+
+    .wizard-step i {
+        width: 20px;
+        height: 20px;
+    }
+
+    .service-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .service-button {
+        align-items: flex-start;
+        min-height: 86px;
+        padding: 12px;
+        gap: 9px;
+    }
+
+    .service-icon {
+        font-size: 23px;
+    }
+
+    .service-content strong {
+        font-size: 12px;
+        line-height: 1.25;
+    }
+
+    .service-content small {
+        font-size: 10px;
+        line-height: 1.3;
+    }
+
+    .service-price {
+        margin-top: 5px;
+        font-size: 9px;
+        letter-spacing: 1px;
+    }
+
+    .booking-panel input,
+    .booking-panel select,
+    .booking-panel textarea {
+        min-height: 50px;
+    }
+
+    .wizard-nav {
+        gap: 7px;
+    }
+
+    .wizard-back,
+    .wizard-nav .confirm-button {
+        min-height: 48px;
+    }
+
+}
+
+@media (max-width: 430px) {
+
+    .assistant-panel {
+        padding-left: calc(8px + env(safe-area-inset-left, 0px));
+        padding-right: calc(8px + env(safe-area-inset-right, 0px));
+    }
+
+    .console-window {
+        border-radius: 21px;
+    }
+
+    .console-window > .wizard-steps {
+        padding-inline: 9px;
+    }
+
+    .wizard-step span {
+        font-size: 8px;
+    }
+
+    .console-body {
+        padding: 12px;
+    }
+
+    .console-dock {
+        padding-inline: 10px;
+    }
+
+    .service-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .service-button {
+        min-height: 72px;
+        align-items: center;
+    }
+
+    .controls {
+        grid-template-columns: minmax(0, 1fr) 48px 48px;
+        display: grid;
+    }
+
+    .mic-button {
+        min-width: 0;
+        padding-inline: 8px;
+        font-size: 11px;
+        letter-spacing: .7px;
+    }
+
+    .secondary-button {
+        width: 48px;
+        padding: 0;
+    }
+
+    .chat-row input {
+        min-width: 0;
+        padding-inline: 12px;
+    }
+
+    .send-button {
+        min-width: 76px;
+        padding-inline: 10px;
+        letter-spacing: 1px;
+    }
+
+}
+
+@media (max-width: 900px) and (max-height: 620px) {
+
+    .assistant-panel {
+        padding-top: calc(66px + env(safe-area-inset-top, 0px));
+    }
+
+    .conversation {
+        max-height: 116px;
+    }
+
+    .console-window > .wizard-steps {
+        padding-block: 7px;
+    }
+
+    .console-dock {
+        padding-block: 8px;
+    }
+
+    .mic-status {
+        display: none;
+    }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .robot-container canvas {
+        filter: saturate(.72);
+    }
+
+}
+
+/* =========================================================
+   18. MOBILE GLASS MODE
+   =========================================================
+
+   The phone experience is intentionally layered: the robot and ambient
+   lighting stay visible through the shell, while text and controls receive
+   only the amount of frost they need. This avoids the "opaque sheet over the
+   scene" effect without turning the booking flow into low-contrast glass.
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    :root {
+        --mobile-glass: rgba(246, 252, 250, .20);
+        --mobile-glass-soft: rgba(232, 244, 240, .14);
+        --mobile-glass-card: rgba(248, 253, 251, .64);
+        --mobile-glass-field: rgba(247, 252, 251, .84);
+        --mobile-glass-border: rgba(48, 83, 89, .22);
+        --mobile-ink-shadow: 0 1px 2px rgba(255, 255, 255, .58);
+    }
+
+    [data-theme="dark"] {
+        --mobile-glass: rgba(17, 34, 41, .34);
+        --mobile-glass-soft: rgba(17, 34, 41, .24);
+        --mobile-glass-card: rgba(27, 53, 60, .72);
+        --mobile-glass-field: rgba(15, 34, 41, .90);
+        --mobile-glass-border: rgba(187, 224, 216, .25);
+        --mobile-ink-shadow: 0 1px 2px rgba(0, 0, 0, .44);
+    }
+
+    .robot-container {
+        opacity: .48;
+    }
+
+    .robot-container canvas {
+        filter: saturate(1) contrast(1.02) brightness(.98);
+    }
+
+    .assistant-panel {
+        padding-top: calc(72px + env(safe-area-inset-top, 0px));
+    }
+
+    .console-window {
+        /* The shell is a clear frame. Frost only the content that needs it,
+           so the robot remains visible between the interactive layers. */
+        background: transparent;
+        border-color: var(--mobile-glass-border);
+        box-shadow: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+
+    .console-window > .wizard-steps {
+        background: var(--mobile-glass-soft);
+        border-bottom-color: var(--mobile-glass-border);
+        backdrop-filter: blur(12px) saturate(1.2);
+        -webkit-backdrop-filter: blur(12px) saturate(1.2);
+    }
+
+    .wizard-step {
+        color: var(--text);
+        text-shadow: var(--mobile-ink-shadow);
+        background: rgba(239, 248, 245, .18);
+        border-color: var(--mobile-glass-border);
+    }
+
+    [data-theme="dark"] .wizard-step {
+        background: rgba(17, 34, 41, .38);
+    }
+
+    .wizard-step.active {
+        background: var(--accent-soft);
+    }
+
+    .conversation {
+        background: var(--mobile-glass-soft);
+        border-bottom-color: var(--mobile-glass-border);
+        backdrop-filter: blur(7px) saturate(1.12);
+        -webkit-backdrop-filter: blur(7px) saturate(1.12);
+    }
+
+    .speech-card,
+    .user-message {
+        background: var(--mobile-glass-card);
+        border-color: var(--mobile-glass-border);
+        box-shadow: 0 8px 24px rgba(7, 35, 43, .10);
+        backdrop-filter: blur(10px) saturate(1.12);
+        -webkit-backdrop-filter: blur(10px) saturate(1.12);
+    }
+
+    .assistant-message,
+    .panel-title,
+    .quick-label,
+    .mic-status {
+        text-shadow: var(--mobile-ink-shadow);
+    }
+
+    .console-body {
+        background: transparent;
+    }
+
+    .service-button,
+    .booking-panel,
+    .confirmation-card {
+        background: var(--mobile-glass-card);
+        border-color: var(--mobile-glass-border);
+        box-shadow: 0 8px 24px rgba(7, 35, 43, .12);
+        backdrop-filter: blur(11px) saturate(1.14);
+        -webkit-backdrop-filter: blur(11px) saturate(1.14);
+    }
+
+    .service-button:not(.selected),
+    .quick-chip,
+    .secondary-button,
+    .wizard-back {
+        background: rgba(239, 248, 245, .28);
+        border-color: var(--mobile-glass-border);
+    }
+
+    [data-theme="dark"] .service-button:not(.selected),
+    [data-theme="dark"] .quick-chip,
+    [data-theme="dark"] .secondary-button,
+    [data-theme="dark"] .wizard-back {
+        background: rgba(17, 34, 41, .46);
+    }
+
+    .booking-panel input,
+    .booking-panel select,
+    .booking-panel textarea,
+    .chat-row input {
+        background: var(--mobile-glass-field);
+        border-color: var(--mobile-glass-border);
+        box-shadow: 0 4px 15px rgba(7, 35, 43, .08);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+
+    .booking-panel input[readonly] {
+        background: rgba(239, 248, 245, .36);
+    }
+
+    [data-theme="dark"] .booking-panel input[readonly] {
+        background: rgba(17, 34, 41, .54);
+    }
+
+    .console-dock {
+        background: var(--mobile-glass);
+        border-top-color: var(--mobile-glass-border);
+        backdrop-filter: blur(13px) saturate(1.18);
+        -webkit-backdrop-filter: blur(13px) saturate(1.18);
+    }
+
+    .stage-hud--bar .stage-pill {
+        background: var(--mobile-glass);
+        border-color: var(--mobile-glass-border);
+        box-shadow: 0 10px 26px rgba(7, 35, 43, .14);
+    }
+
+    .theme-toggle {
+        background: rgba(239, 248, 245, .34);
+        border-color: var(--mobile-glass-border);
+    }
+
+    [data-theme="dark"] .theme-toggle {
+        background: rgba(17, 34, 41, .58);
+    }
+
+    .panel-title,
+    .quick-label,
+    .mic-status,
+    .booking-panel label {
+        color: var(--text-soft);
+    }
+
+    .eco-proof {
+        background: rgba(91, 170, 146, .15);
+        border-color: var(--mobile-glass-border);
+    }
+
+    .mic-button,
+    .send-button,
+    .confirm-button,
+    .service-button.selected,
+    .quick-chip.selected {
+        backdrop-filter: saturate(1.15);
+        -webkit-backdrop-filter: saturate(1.15);
+    }
+
+}
+
+@media (max-width: 430px) {
+
+    .console-window {
+        border-radius: 21px;
+        background: transparent;
+    }
+
+    .console-body {
+        padding-top: 10px;
+    }
+
+    .speech-card,
+    .service-button,
+    .booking-panel,
+    .confirmation-card {
+        box-shadow: 0 6px 18px rgba(7, 35, 43, .10);
+    }
+
+}
+
+@media (max-width: 900px) and (max-height: 620px) {
+
+    .robot-container {
+        opacity: .56;
+    }
+
+    .console-window {
+        background: transparent;
+    }
+
+}
+
+
+/* =========================================================
+   KOTIVA PRODUCT REFRESH
+   Customer-facing marketplace layer over the existing 3D stage.
+   ========================================================= */
+
+:root {
+    --bg: #eef5f1;
+    --bg-glow-a: rgba(124, 198, 168, .28);
+    --bg-glow-b: rgba(244, 188, 111, .16);
+    --panel: rgba(250, 253, 251, .92);
+    --surface: #fbfdfb;
+    --surface-2: #eef6f2;
+    --surface-3: #dcebe4;
+    --text: #163b36;
+    --text-soft: #52716a;
+    --muted: #75908a;
+    --line: rgba(24, 83, 70, .14);
+    --line-strong: rgba(24, 83, 70, .28);
+    --accent: #1b6b59;
+    --accent-bright: #70c5a4;
+    --accent-ink: #f6fff9;
+    --accent-soft: rgba(27, 107, 89, .11);
+    --accent-glow: rgba(27, 107, 89, .24);
+    --ok: #348d68;
+    --ok-soft: rgba(52, 141, 104, .12);
+    --radius: 18px;
+}
+
+[data-theme="dark"] {
+    --bg: #102b2b;
+    --bg-glow-a: rgba(77, 176, 141, .2);
+    --bg-glow-b: rgba(247, 184, 96, .12);
+    --panel: rgba(16, 43, 43, .9);
+    --surface: rgba(20, 52, 50, .96);
+    --surface-2: rgba(25, 65, 60, .86);
+    --surface-3: rgba(220, 247, 234, .1);
+    --text: #effbf4;
+    --text-soft: #b8d8ca;
+    --muted: #87aaa0;
+    --line: rgba(206, 239, 221, .18);
+    --line-strong: rgba(206, 239, 221, .34);
+    --accent: #7bd0ac;
+    --accent-bright: #a4e1c4;
+    --accent-ink: #12342c;
+    --accent-soft: rgba(123, 208, 172, .16);
+    --accent-glow: rgba(123, 208, 172, .24);
+}
+
+body {
+    background:
+        radial-gradient(ellipse at 12% 4%, var(--bg-glow-a), transparent 42%),
+        radial-gradient(ellipse at 83% 65%, var(--bg-glow-b), transparent 46%),
+        var(--bg);
+}
+
+.main-nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 18px;
+}
+
+.nav-link {
+    padding: 8px 10px;
+    color: var(--muted);
+    border-radius: 9px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+button.nav-link { cursor: pointer; }
+.nav-link--active, button.nav-link:hover { color: var(--accent); background: var(--accent-soft); }
+
+.stage-pill--brand { gap: 10px; padding: 9px 12px; border-radius: 18px; }
+.stage-hud--bar .stage-pill { max-width: min(920px, calc(100vw - 28px)); }
+.stage-hud--bar .brand-icon { width: 38px; height: 38px; border-radius: 12px; font-size: 21px; letter-spacing: -1px; }
+.stage-hud--bar .brand-name { font-size: 19px; letter-spacing: -1px; }
+.stage-hud--bar .brand-subtitle { color: var(--accent); font-size: 8px; letter-spacing: 1.4px; font-weight: 800; }
+
+.hero-copy {
+    position: absolute;
+    top: 50%;
+    left: clamp(28px, 8vw, 120px);
+    width: min(510px, calc(100vw - 56px));
+    transform: translateY(-50%);
+    pointer-events: auto;
+    text-align: left;
+}
+
+.hero-eyebrow, .eyebrow, .panel-kicker {
+    color: var(--accent);
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.hero-eyebrow { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+.hero-eyebrow-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 5px var(--ok-soft); }
+
+.hero-copy h1 {
+    max-width: 520px;
+    margin: 0;
+    color: var(--text);
+    font-size: clamp(42px, 5.1vw, 76px);
+    line-height: .96;
+    letter-spacing: -4px;
+    font-weight: 850;
+    text-wrap: balance;
+}
+
+.hero-copy h1 em { color: var(--accent); font-style: normal; }
+.hero-lead { max-width: 440px; margin: 24px 0 22px; color: var(--text-soft); font-size: 16px; line-height: 1.6; }
+.hero-actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.hero-caption { color: var(--muted); font-size: 11px; font-weight: 700; }
+
+.start-overlay { display: block; }
+.start-button {
+    position: static;
+    min-width: 0;
+    min-height: 54px;
+    padding: 0 22px;
+    transform: none;
+    color: var(--accent-ink);
+    background: var(--accent);
+    border-radius: 13px;
+    box-shadow: 0 16px 32px var(--accent-glow);
+    font-size: 12px;
+    letter-spacing: .8px;
+}
+.start-button span { display: inline-block; margin-left: 12px; font-size: 18px; line-height: 0; transition: transform var(--speed) var(--ease); }
+.start-button:hover { transform: translateY(-2px); box-shadow: 0 20px 42px var(--accent-glow); filter: none; }
+.start-button:hover span { transform: translate(2px, -2px); }
+.start-button:active { transform: translateY(0) scale(.98); }
+.start-note { display: none; }
+
+.hero-trust { display: flex; gap: 24px; margin-top: 34px; }
+.hero-trust div { display: grid; gap: 3px; }
+.hero-trust strong { color: var(--text); font-size: 18px; letter-spacing: -.5px; }
+.hero-trust span { color: var(--muted); font-size: 10px; font-weight: 700; }
+.service-area-note { margin-top: 24px; color: var(--muted); font-size: 11px; font-weight: 650; }
+.service-area-note span { color: var(--accent); margin-right: 5px; font-size: 16px; }
+
+.robot-container { opacity: .92; }
+.robot-section::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--bg) 76%, transparent) 0%, color-mix(in srgb, var(--bg) 28%, transparent) 48%, transparent 78%);
+}
+.robot-container { z-index: 0; }
+.stage-hud, .start-overlay { z-index: 3; }
+
+.assistant-panel { width: clamp(470px, 42vw, 580px); padding: 18px; }
+.console-window { border-radius: 24px; border-color: color-mix(in srgb, var(--accent) 16%, var(--line)); }
+.assistant-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 18px 18px 8px; background: var(--surface); }
+.assistant-heading h2 { margin-top: 4px; color: var(--text); font-size: 24px; letter-spacing: -1px; }
+.assistant-live { display: inline-flex; align-items: center; gap: 6px; padding: 7px 9px; color: var(--ok); background: var(--ok-soft); border-radius: 999px; font-size: 9px; font-weight: 800; white-space: nowrap; }
+.assistant-live i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor; }
+.console-window > .wizard-steps { padding-top: 10px; }
+.conversation { padding-top: 10px; }
+.speech-card { background: color-mix(in srgb, var(--accent-soft) 72%, var(--surface) 28%); border-color: color-mix(in srgb, var(--accent) 14%, var(--line)); }
+.assistant-message { font-size: 14px; line-height: 1.55; }
+.panel-kicker { margin-bottom: 7px; color: var(--muted); font-size: 9px; letter-spacing: 1.5px; }
+.panel-title { margin-bottom: 14px; color: var(--text); font-size: 20px; font-weight: 850; letter-spacing: -.6px; }
+.eco-proof { display: none; }
+.service-grid { gap: 10px; }
+.service-button { min-height: 88px; padding: 14px; border-radius: 16px; }
+.service-button::before { background: linear-gradient(90deg, var(--accent), var(--accent-bright)); }
+.service-icon { display: grid; place-items: center; width: 35px; height: 35px; color: var(--accent); background: var(--accent-soft); border-radius: 11px; font-size: 19px; }
+.service-content strong { font-size: 13px; }
+.service-content small { max-width: 175px; font-size: 11px; line-height: 1.3; }
+.service-price { margin-top: 7px; color: var(--accent); font-size: 9px; font-weight: 900; letter-spacing: 1.1px; }
+.selection-trust { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 14px; color: var(--muted); font-size: 10px; font-weight: 700; }
+.selection-trust span:first-child { color: var(--ok); }
+.booking-panel { padding: 18px; border-radius: 18px; }
+.route-intro, .time-note { display: flex; align-items: flex-start; gap: 10px; margin: -2px 0 12px; padding: 10px 12px; color: var(--text-soft); background: var(--surface); border: 1px solid var(--line); border-radius: 12px; font-size: 11px; line-height: 1.45; }
+.route-line { width: 6px; min-height: 34px; margin-top: 2px; background: linear-gradient(var(--accent), var(--accent-bright)); border-radius: 99px; }
+.time-note span { color: var(--accent); font-size: 19px; line-height: 1; }
+.address-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.label-optional { color: var(--muted); font-weight: 500; letter-spacing: 0; }
+.price-preview { display: flex; align-items: center; justify-content: space-between; margin-top: 15px; padding: 13px 14px; color: var(--text-soft); background: var(--surface); border: 1px solid var(--line); border-radius: 12px; font-size: 12px; font-weight: 700; }
+.price-preview strong { color: var(--accent); font-size: 17px; }
+.confirm-button { background: var(--accent); }
+.quick-chip.selected { background: var(--accent); }
+.console-dock { background: color-mix(in srgb, var(--surface-2) 90%, transparent); }
+.mic-button, .send-button { background: var(--accent); }
+
+@media (max-width: 1180px) {
+    .main-nav { display: none; }
+    .hero-copy { left: 5vw; }
+    .hero-copy h1 { font-size: clamp(42px, 6vw, 64px); }
+}
+
+@media (max-width: 900px) {
+    .robot-section::after { background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 10%, transparent), color-mix(in srgb, var(--bg) 86%, transparent) 58%, var(--bg) 100%); }
+    .robot-container { opacity: .34; }
+    .stage-hud--bar .stage-pill { padding: 7px 10px; }
+    .stage-hud--bar .brand-name { font-size: 18px; }
+    .hero-copy { top: 35%; left: 22px; width: calc(100vw - 44px); transform: none; }
+    .hero-copy h1 { font-size: clamp(42px, 13vw, 62px); letter-spacing: -3px; }
+    .hero-lead { margin: 17px 0 18px; font-size: 14px; }
+    .hero-trust { gap: 18px; margin-top: 24px; }
+    .hero-trust strong { font-size: 16px; }
+    .service-area-note { margin-top: 18px; }
+    .start-overlay { inset: 0; }
+    .assistant-panel { width: 100%; padding: calc(72px + env(safe-area-inset-top, 0px)) 10px calc(10px + env(safe-area-inset-bottom, 0px)); }
+    .console-window { border-radius: 22px; }
+    .assistant-heading { padding: 15px 15px 8px; }
+    .assistant-heading h2 { font-size: 21px; }
+    .address-pair { grid-template-columns: 1fr; gap: 0; }
+    .selection-trust { gap: 8px; }
+}
+
+@media (max-width: 520px) {
+    .stage-hud--bar .brand-subtitle { display: block; font-size: 7px; }
+    .ai-badge, .eco-badge { display: none; }
+    .hero-copy { top: 31%; }
+    .hero-copy h1 { font-size: 47px; }
+    .hero-lead { max-width: 340px; }
+    .hero-caption { width: 100%; }
+    .hero-trust { margin-top: 20px; }
+    .hero-trust div:last-child { display: none; }
+    .service-area-note { font-size: 10px; }
+    .assistant-heading { padding-inline: 14px; }
+    .assistant-live { padding: 6px 8px; font-size: 8px; }
+    .service-button { min-height: 82px; padding: 11px; gap: 8px; }
+    .service-content small { font-size: 10px; }
+    .selection-trust { font-size: 9px; }
+}
+
+/* =========================================================
+   LIVE ROUTE + PRICING
+   ========================================================= */
+
+.route-actions {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-top: 12px;
+}
+
+.route-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 42px;
+    padding: 0 12px;
+    color: var(--accent-ink);
+    background: var(--accent);
+    border-radius: 11px;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: .8px;
+    white-space: nowrap;
+    transition: filter var(--speed) var(--ease), transform var(--speed) var(--ease), opacity var(--speed) var(--ease);
+}
+
+.route-button:hover { filter: brightness(1.06); transform: translateY(-1px); }
+.route-button:disabled { cursor: wait; opacity: .72; transform: none; }
+.route-button.is-loading::after {
+    content: "";
+    width: 12px;
+    height: 12px;
+    margin-left: 2px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: route-spin .7s linear infinite;
+}
+
+@keyframes route-spin { to { transform: rotate(360deg); } }
+
+.route-status {
+    min-width: 0;
+    color: var(--muted);
+    font-size: 10px;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.route-map-shell {
+    position: relative;
+    margin-top: 12px;
+    overflow: hidden;
+    background: var(--surface-3);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+}
+
+.route-map {
+    width: 100%;
+    height: 190px;
+    background: #dfece5;
+}
+
+.route-map .leaflet-control-zoom a {
+    color: var(--text);
+    background: var(--surface);
+    border-color: var(--line);
+}
+
+.map-attribution-note {
+    position: absolute;
+    right: 7px;
+    bottom: 5px;
+    z-index: 500;
+    padding: 2px 5px;
+    color: var(--muted);
+    background: color-mix(in srgb, var(--surface) 84%, transparent);
+    border-radius: 4px;
+    font-size: 8px;
+    pointer-events: none;
+}
+
+.route-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+    margin-top: 9px;
+}
+
+.route-summary > div {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+    padding: 9px 10px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+}
+
+.route-summary span {
+    color: var(--muted);
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+.route-summary strong {
+    min-width: 0;
+    color: var(--text);
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.route-summary > div:last-child strong { color: var(--accent); }
+
+@media (max-width: 520px) {
+    .route-actions { align-items: stretch; flex-direction: column; }
+    .route-button { width: 100%; }
+    .route-status { min-height: 14px; }
+    .route-map { height: 165px; }
+    .route-summary { gap: 5px; }
+    .route-summary > div { padding: 8px 7px; }
+    .route-summary strong { font-size: 12px; }
+}
+
+
+/* =========================================================
+   FINAL RESPONSIVE LAYOUT SYSTEM
+   One last cascade layer keeps the immersive desktop view and the
+   delivery wizard usable at every viewport width.
+   ========================================================= */
+
+html,
+body,
+.app,
+.main {
+    min-width: 0;
+}
+
+/* Desktop: preserve the 3D stage, but give the order console a stable
+   reading width and enough vertical room for the route workflow. */
+@media (min-width: 901px) {
+    .main {
+        align-items: stretch;
+        justify-content: flex-end;
+    }
+
+    .assistant-panel {
+        align-self: stretch;
+        width: clamp(500px, 40vw, 640px);
+        height: 100%;
+        padding: 24px clamp(18px, 2vw, 32px) 24px 18px;
+    }
+
+    .console-window {
+        width: 100%;
+        max-height: calc(100dvh - 48px);
+        border-radius: 24px;
+    }
+
+    .console-body {
+        overflow-x: hidden;
+        padding: 20px;
+    }
+
+    .assistant-heading {
+        padding: 20px 20px 12px;
+    }
+
+    .console-window > .wizard-steps {
+        padding: 10px 20px 12px;
+    }
+
+    .service-grid {
+        gap: 12px;
+    }
+
+    .service-button {
+        min-height: 94px;
+        padding: 15px;
+    }
+
+    .booking-panel {
+        padding: 20px;
+    }
+
+    .route-map {
+        height: 210px;
+    }
+}
+
+/* Medium desktop/tablet landscape: keep the stage visible, but prevent the
+   console and hero from competing for too much horizontal space. */
+@media (min-width: 901px) and (max-width: 1180px) {
+    .assistant-panel {
+        width: min(520px, 46vw);
+        padding-right: 16px;
+    }
+
+    .hero-copy {
+        left: 42px;
+        width: min(430px, 42vw);
+    }
+
+    .hero-copy h1 {
+        font-size: clamp(40px, 5.6vw, 62px);
+        letter-spacing: -3px;
+    }
+
+    .stage-hud--bar .stage-pill {
+        max-width: calc(100vw - 32px);
+    }
+}
+
+/* Tablet portrait: the console becomes the main workspace without the
+   phone-specific glass treatment taking over too early. */
+@media (min-width: 601px) and (max-width: 900px) {
+    .assistant-panel {
+        height: 100%;
+        padding: calc(78px + env(safe-area-inset-top, 0px))
+            max(24px, env(safe-area-inset-right, 0px))
+            max(24px, env(safe-area-inset-bottom, 0px))
+            max(24px, env(safe-area-inset-left, 0px));
+    }
+
+    .console-window {
+        max-width: 720px;
+        margin: 0 auto;
+        border-radius: 24px;
+    }
+
+    .console-body {
+        padding: 20px;
+    }
+
+    .service-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .service-button {
+        min-height: 88px;
+    }
+
+    .address-pair {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .route-actions {
+        align-items: center;
+    }
+
+    .route-button {
+        flex: 0 0 auto;
+    }
+}
+
+/* Phones: the console fills the safe viewport and every interactive control
+   remains reachable with one hand and an open keyboard. */
+@media (max-width: 600px) {
+    body {
+        overflow: hidden;
+    }
+
+    .assistant-panel {
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        padding-top: calc(70px + env(safe-area-inset-top, 0px));
+        padding-right: max(8px, env(safe-area-inset-right, 0px));
+        padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
+        padding-left: max(8px, env(safe-area-inset-left, 0px));
+    }
+
+    .console-window {
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        max-height: none;
+        border-radius: 22px;
+    }
+
+    .assistant-heading {
+        padding: 14px 14px 9px;
+    }
+
+    .assistant-heading h2 {
+        font-size: 20px;
+    }
+
+    .console-window > .wizard-steps {
+        padding: 9px 10px;
+    }
+
+    .wizard-step {
+        min-height: 40px;
+        padding: 7px 6px;
+    }
+
+    .conversation {
+        max-height: clamp(104px, 19vh, 148px);
+        padding: 10px 12px;
+    }
+
+    .console-body {
+        min-height: 0;
+        padding: 12px;
+        overflow-x: hidden;
+        overscroll-behavior-y: contain;
+    }
+
+    .booking-panel {
+        padding: 14px;
+    }
+
+    .address-pair {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .route-actions {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 7px;
+    }
+
+    .route-button {
+        width: 100%;
+        min-height: 48px;
+    }
+
+    .route-status {
+        min-height: 18px;
+        text-align: center;
+    }
+
+    .route-map {
+        height: clamp(156px, 28vw, 190px);
+    }
+
+    .route-summary {
+        gap: 6px;
+    }
+
+    .route-summary > div {
+        padding: 9px 8px;
+    }
+
+    .route-summary strong {
+        font-size: 12px;
+    }
+
+    .wizard-nav {
+        margin-inline: -2px;
+        padding-inline: 2px;
+    }
+
+    .wizard-back,
+    .wizard-nav .confirm-button {
+        min-height: 48px;
+    }
+
+    .console-dock {
+        padding-right: 10px;
+        padding-left: 10px;
+    }
+
+    .controls {
+        min-width: 0;
+    }
+
+    .mic-button,
+    .secondary-button,
+    .send-button {
+        min-height: 48px;
+    }
+
+    .mic-button {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .chat-row input {
+        min-width: 0;
+    }
+}
+
+/* Very narrow phones: the route summary gets a readable two-row layout and
+   the composer never forces horizontal scrolling. */
+@media (max-width: 399px) {
+    .console-window > .wizard-steps {
+        padding-inline: 7px;
+    }
+
+    .wizard-step {
+        gap: 4px;
+        font-size: 8px;
+    }
+
+    .wizard-step i {
+        width: 19px;
+        height: 19px;
+    }
+
+    .route-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .route-summary > div:last-child {
+        grid-column: 1 / -1;
+    }
+
+    .route-summary > div:last-child strong {
+        font-size: 14px;
+    }
+
+    .chat-row {
+        gap: 5px;
+    }
+
+    .send-button {
+        min-width: 70px;
+        padding-inline: 8px;
+        font-size: 10px;
+    }
+}
+
+/* Landscape phone: release vertical space from decorative areas and keep
+   the form itself scrollable. */
+@media (max-width: 900px) and (max-height: 560px) {
+    .assistant-panel {
+        padding-top: calc(56px + env(safe-area-inset-top, 0px));
+    }
+
+    .conversation {
+        max-height: 88px;
+    }
+
+    .console-window > .wizard-steps {
+        padding-block: 6px;
+    }
+
+    .console-dock {
+        padding-top: 7px;
+        padding-bottom: max(7px, env(safe-area-inset-bottom, 0px));
+    }
+
+    .mic-status {
+        display: none;
+    }
+}
+
+
+/* =========================================================
+   DESKTOP COMPOSITION FIX
+   Desktop only. Mobile and tablet rules above remain unchanged.
+   ========================================================= */
+
+@media (min-width: 901px) {
+    /* A single compact top bar replaces the wrapped desktop header. */
+    .stage-hud--bar {
+        top: 16px;
+        right: 24px;
+        left: 24px;
+        width: auto;
+        max-width: none;
+        align-items: flex-start;
+    }
+
+    .stage-pill--brand {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        width: 100%;
+        max-width: none;
+        min-height: 68px;
+        padding: 12px 16px;
+        gap: 12px;
+        border-radius: 20px;
+    }
+
+    .stage-pill--brand .brand {
+        flex: 0 0 auto;
+    }
+
+    .stage-hud--bar .brand-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        font-size: 21px;
+    }
+
+    .stage-hud--bar .brand-name {
+        font-size: 20px;
+        letter-spacing: -1px;
+    }
+
+    .stage-hud--bar .brand-subtitle {
+        font-size: 8px;
+        letter-spacing: 1.35px;
+    }
+
+    .stage-pill--brand .main-nav {
+        flex: 0 1 auto;
+        min-width: 0;
+        margin-left: clamp(8px, 2vw, 28px);
+    }
+
+    .stage-pill--brand .console-actions {
+        flex: 0 0 auto;
+        margin-left: auto;
+        flex-wrap: nowrap;
+        gap: 8px;
+    }
+
+    /* The hero owns the left reading area and never competes with the
+       desktop order workspace on the right. */
+    .hero-copy {
+        left: clamp(48px, 7vw, 108px);
+        width: min(520px, calc(100vw - 700px));
+        max-width: 520px;
+    }
+
+    .hero-copy h1 {
+        font-size: clamp(48px, 5.25vw, 78px);
+        line-height: .94;
+        letter-spacing: -4.5px;
+    }
+
+    .hero-lead {
+        max-width: 460px;
+        margin-top: 22px;
+        font-size: 16px;
+    }
+
+    /* Desktop request state: the order console is a real workspace, not a
+       content-sized card stranded at the bottom of the screen. */
+    .assistant-panel {
+        align-items: stretch;
+        align-self: stretch;
+        width: clamp(520px, 40vw, 640px);
+        height: 100%;
+        padding: 104px clamp(22px, 2.4vw, 36px) 24px 18px;
+    }
+
+    .console-window {
+        width: 100%;
+        height: 100%;
+        max-height: none;
+        border-radius: 24px;
+    }
+
+    .assistant-heading {
+        flex: 0 0 auto;
+        padding: 20px 22px 12px;
+    }
+
+    .console-window > .wizard-steps {
+        flex: 0 0 auto;
+        padding: 10px 22px 12px;
+    }
+
+    .console-body {
+        flex: 1 1 auto;
+        min-height: 0;
+        padding: 22px;
+        overflow-x: hidden;
+    }
+
+    .service-panel,
+    .booking-panel {
+        width: 100%;
+        max-width: 620px;
+        margin-right: auto;
+        margin-left: auto;
+    }
+
+    .service-grid {
+        gap: 12px;
+    }
+
+    .service-button {
+        min-height: 92px;
+        padding: 14px;
+    }
+
+    .booking-panel {
+        padding: 20px;
+    }
+
+    .route-map {
+        height: 210px;
+    }
+}
+
+/* Desktop landscape below 1180px: keep the same composition while giving
+   the hero and panel a safe amount of breathing room. */
+@media (min-width: 901px) and (max-width: 1180px) {
+    .stage-hud--bar {
+        right: 16px;
+        left: 16px;
+    }
+
+    .stage-pill--brand {
+        min-height: 62px;
+        padding: 10px 12px;
+    }
+
+    .stage-pill--brand .main-nav {
+        display: none;
+    }
+
+    .stage-pill--brand .console-actions {
+        margin-left: auto;
+    }
+
+    .assistant-panel {
+        width: min(500px, 48vw);
+        padding-right: 16px;
+    }
+
+    .hero-copy {
+        left: 40px;
+        width: min(430px, calc(100vw - 570px));
+    }
+
+    .hero-copy h1 {
+        font-size: clamp(42px, 5.4vw, 62px);
+        letter-spacing: -3px;
+    }
+}
+
+
+/* =========================================================
+   DESKTOP HEADER: THREE-ZONE FULL-WIDTH BAR
+   Desktop only. The mobile header remains governed by max-width rules.
+   ========================================================= */
+
+@media (min-width: 901px) {
+    .stage-hud--bar {
+        top: 18px;
+        right: 24px;
+        bottom: auto;
+        left: 24px;
+        width: auto;
+        max-width: none;
+        pointer-events: none;
+    }
+
+    .stage-pill--brand {
+        display: grid;
+        grid-template-columns: minmax(220px, 1fr) auto minmax(300px, 1fr);
+        align-items: center;
+        width: 100%;
+        max-width: none;
+        min-height: 72px;
+        padding: 12px 18px;
+        gap: 22px;
+        pointer-events: auto;
+        border-radius: 20px;
+    }
+
+    .stage-pill--brand .console-dots {
+        display: none;
+    }
+
+    .stage-pill--brand .brand {
+        grid-column: 1;
+        min-width: 0;
+        justify-self: start;
+    }
+
+    .stage-pill--brand .main-nav {
+        grid-column: 2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: max-content;
+        margin: 0;
+        gap: 6px;
+    }
+
+    .stage-pill--brand .nav-link {
+        padding: 9px 13px;
+        font-size: 10px;
+        letter-spacing: .25px;
+    }
+
+    .stage-pill--brand .console-actions {
+        grid-column: 3;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        min-width: 0;
+        margin: 0;
+        gap: 9px;
+        flex-wrap: nowrap;
+        overflow: hidden;
+    }
+
+    .stage-pill--brand .ai-badge,
+    .stage-pill--brand .online-status,
+    .stage-pill--brand .eco-badge {
+        flex: 0 1 auto;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .stage-pill--brand .ai-badge {
+        max-width: 142px;
+    }
+
+    .stage-pill--brand .online-status {
+        max-width: 126px;
+    }
+
+    .stage-pill--brand .eco-badge {
+        max-width: 122px;
+    }
+
+    .stage-pill--brand .theme-toggle {
+        flex: 0 0 40px;
+    }
+
+    .stage-hud--bar .brand-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        font-size: 21px;
+    }
+
+    .stage-hud--bar .brand-name {
+        font-size: 20px;
+        letter-spacing: -1px;
+    }
+
+    .stage-hud--bar .brand-subtitle {
+        margin-top: 2px;
+        font-size: 8px;
+        letter-spacing: 1.35px;
+    }
+}
+
+@media (min-width: 901px) and (max-width: 1180px) {
+    .stage-pill--brand {
+        grid-template-columns: minmax(185px, 1fr) auto minmax(230px, 1fr);
+        gap: 12px;
+        padding-inline: 13px;
+    }
+
+    .stage-pill--brand .nav-link {
+        padding-inline: 9px;
+        font-size: 9px;
+    }
+
+    .stage-pill--brand .ai-badge {
+        max-width: 92px;
+    }
+
+    .stage-pill--brand .online-status {
+        max-width: 96px;
+        font-size: 9px;
+    }
+
+    .stage-pill--brand .eco-badge {
+        max-width: 96px;
+        padding-inline: 6px;
+        font-size: 8px;
+    }
+}
+
+
+/* =========================================================
+   DESKTOP EXPERIENCE REDESIGN
+   Rebuilds the desktop composition from the top bar through the
+   booking workspace. The 3D Puhto scene and all mobile rules stay intact.
+   ========================================================= */
+
+@media (min-width: 901px) {
+    :root {
+        --desktop-header-height: 76px;
+        --desktop-panel-width: clamp(540px, 42vw, 650px);
+        --desktop-edge: clamp(24px, 3vw, 52px);
+    }
+
+    body {
+        overflow: hidden;
+    }
+
+    .main {
+        position: relative;
+        align-items: stretch;
+        justify-content: flex-end;
+        min-height: 0;
+    }
+
+    .robot-section::after {
+        background:
+            linear-gradient(90deg,
+                color-mix(in srgb, var(--bg) 90%, transparent) 0%,
+                color-mix(in srgb, var(--bg) 58%, transparent) 42%,
+                color-mix(in srgb, var(--bg) 12%, transparent) 76%,
+                transparent 100%),
+            linear-gradient(180deg,
+                color-mix(in srgb, var(--bg) 12%, transparent) 0%,
+                transparent 30%,
+                color-mix(in srgb, var(--bg) 24%, transparent) 100%);
+    }
+
+    /* Compact utility bar: identity, navigation, then live status. */
+    .stage-hud--bar {
+        top: 18px;
+        right: var(--desktop-edge);
+        left: var(--desktop-edge);
+        width: auto;
+        max-width: none;
+        pointer-events: none;
+    }
+
+    .stage-pill--brand {
+        display: grid;
+        grid-template-columns: minmax(230px, 1fr) auto minmax(330px, 1fr);
+        align-items: center;
+        width: 100%;
+        min-height: var(--desktop-header-height);
+        padding: 10px 16px;
+        gap: 26px;
+        pointer-events: auto;
+        background: color-mix(in srgb, var(--panel) 90%, transparent);
+        border: 1px solid color-mix(in srgb, var(--accent) 15%, var(--line));
+        border-radius: 22px;
+        box-shadow: 0 18px 45px color-mix(in srgb, var(--text) 12%, transparent);
+        backdrop-filter: blur(22px) saturate(1.08);
+    }
+
+    .stage-pill--brand .console-dots {
+        display: none;
+    }
+
+    .stage-pill--brand .brand {
+        grid-column: 1;
+        min-width: 0;
+        justify-self: start;
+    }
+
+    .stage-hud--bar .brand-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 13px;
+        font-size: 22px;
+    }
+
+    .stage-hud--bar .brand-name {
+        font-size: 21px;
+        letter-spacing: -1.1px;
+    }
+
+    .stage-hud--bar .brand-subtitle {
+        margin-top: 2px;
+        color: var(--accent);
+        font-size: 8px;
+        font-weight: 900;
+        letter-spacing: 1.5px;
+    }
+
+    .stage-pill--brand .main-nav {
+        grid-column: 2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: max-content;
+        margin: 0;
+        gap: 4px;
+    }
+
+    .stage-pill--brand .nav-link {
+        padding: 10px 14px;
+        color: var(--text-soft);
+        border-radius: 10px;
+        font-size: 10px;
+        font-weight: 850;
+        letter-spacing: .35px;
+    }
+
+    .stage-pill--brand .nav-link--active,
+    .stage-pill--brand button.nav-link:hover {
+        color: var(--accent-ink);
+        background: var(--accent);
+        box-shadow: 0 8px 18px var(--accent-glow);
+    }
+
+    .stage-pill--brand .console-actions {
+        grid-column: 3;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        min-width: 0;
+        margin: 0;
+        gap: 9px;
+        flex-wrap: nowrap;
+        overflow: hidden;
+    }
+
+    .stage-pill--brand .ai-badge,
+    .stage-pill--brand .online-status,
+    .stage-pill--brand .eco-badge {
+        flex: 0 1 auto;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .stage-pill--brand .ai-badge { max-width: 144px; }
+    .stage-pill--brand .online-status { max-width: 126px; }
+    .stage-pill--brand .eco-badge { max-width: 124px; }
+    .stage-pill--brand .theme-toggle { flex: 0 0 40px; }
+
+    /* Landing composition: generous editorial hero on the left, Puhto stays
+       the visual anchor in the open middle of the stage. */
+    .hero-copy {
+        top: 53%;
+        left: var(--desktop-edge);
+        width: min(560px, calc(100vw - var(--desktop-panel-width) - 150px));
+        max-width: 560px;
+        transform: translateY(-50%);
+    }
+
+    .hero-eyebrow {
+        margin-bottom: 18px;
+        font-size: 10px;
+        letter-spacing: 2.2px;
+    }
+
+    .hero-copy h1 {
+        max-width: 560px;
+        font-size: clamp(54px, 5.2vw, 82px);
+        line-height: .93;
+        letter-spacing: -5px;
+    }
+
+    .hero-lead {
+        max-width: 475px;
+        margin: 24px 0 24px;
+        font-size: 16px;
+        line-height: 1.65;
+    }
+
+    .hero-actions {
+        gap: 18px;
+    }
+
+    .start-button {
+        min-height: 56px;
+        padding-inline: 24px;
+        border-radius: 15px;
+        font-size: 12px;
+    }
+
+    .hero-trust {
+        gap: 30px;
+        margin-top: 34px;
+    }
+
+    .hero-trust strong {
+        font-size: 20px;
+    }
+
+    .service-area-note {
+        margin-top: 28px;
+    }
+
+    /* Request state: a tall, calm workspace on the right. */
+    .assistant-panel {
+        align-self: stretch;
+        align-items: stretch;
+        width: var(--desktop-panel-width);
+        height: 100%;
+        padding: calc(var(--desktop-header-height) + 42px) var(--desktop-edge) 24px 18px;
+        background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--bg) 18%, transparent));
+        pointer-events: none;
+    }
+
+    .console-window {
+        width: 100%;
+        height: 100%;
+        max-height: none;
+        background: color-mix(in srgb, var(--surface) 94%, transparent);
+        border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--line));
+        border-radius: 28px;
+        box-shadow: 0 28px 80px color-mix(in srgb, var(--text) 18%, transparent);
+        backdrop-filter: blur(24px) saturate(1.08);
+    }
+
+    .assistant-heading {
+        flex: 0 0 auto;
+        align-items: center;
+        padding: 22px 24px 14px;
+        background: color-mix(in srgb, var(--surface) 94%, transparent);
+    }
+
+    .assistant-heading h2 {
+        margin-top: 5px;
+        font-size: 25px;
+        letter-spacing: -1.1px;
+    }
+
+    .assistant-live {
+        padding: 8px 10px;
+        font-size: 9px;
+        letter-spacing: .4px;
+    }
+
+    .console-window > .wizard-steps {
+        flex: 0 0 auto;
+        padding: 11px 24px 14px;
+        background: color-mix(in srgb, var(--surface) 94%, transparent);
+    }
+
+    .wizard-step {
+        min-height: 42px;
+        padding: 8px 11px;
+        border-radius: 11px;
+    }
+
+    .console-body {
+        flex: 1 1 auto;
+        min-height: 0;
+        padding: 22px 24px 28px;
+        overflow-x: hidden;
+        background: color-mix(in srgb, var(--surface) 96%, transparent);
+    }
+
+    .service-panel,
+    .booking-panel {
+        width: 100%;
+        max-width: 620px;
+        margin-right: auto;
+        margin-left: auto;
+    }
+
+    .panel-title {
+        margin-bottom: 16px;
+        font-size: 21px;
+    }
+
+    .service-grid {
+        gap: 13px;
+    }
+
+    .service-button {
+        min-height: 104px;
+        padding: 16px;
+        border-radius: 17px;
+    }
+
+    .service-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        font-size: 20px;
+    }
+
+    .service-content strong {
+        font-size: 14px;
+    }
+
+    .service-content small {
+        max-width: 190px;
+        font-size: 11px;
+        line-height: 1.4;
+    }
+
+    .selection-trust {
+        margin-top: 18px;
+    }
+
+    .booking-panel {
+        padding: 20px;
+        border-radius: 18px;
+    }
+
+    .route-map {
+        height: 220px;
+    }
+
+    .route-summary > div {
+        padding: 11px 12px;
+    }
+
+    /* The footer controls remain available when the assistant is in chat
+       mode, but never compete with the booking workspace. */
+    .console-dock {
+        border-radius: 0 0 27px 27px;
+    }
+}
+
+@media (min-width: 901px) and (max-width: 1180px) {
+    .stage-pill--brand {
+        grid-template-columns: minmax(190px, 1fr) auto minmax(250px, 1fr);
+        gap: 12px;
+        padding-inline: 13px;
+    }
+
+    .stage-pill--brand .main-nav {
+        gap: 1px;
+    }
+
+    .stage-pill--brand .nav-link {
+        padding-inline: 9px;
+        font-size: 9px;
+    }
+
+    .stage-pill--brand .ai-badge { max-width: 92px; }
+    .stage-pill--brand .online-status { max-width: 102px; font-size: 9px; }
+    .stage-pill--brand .eco-badge { max-width: 96px; padding-inline: 6px; font-size: 8px; }
+
+    .hero-copy {
+        left: 40px;
+        width: min(450px, calc(100vw - 590px));
+    }
+
+    .hero-copy h1 {
+        font-size: clamp(44px, 5.4vw, 66px);
+        letter-spacing: -3.6px;
+    }
+
+    .assistant-panel {
+        width: min(500px, 46vw);
+        padding-right: 16px;
+    }
+}
+
+
+/* =========================================================
+   DESKTOP BREATHING-ROOM HEADER
+   Three independent desktop zones instead of one crowded card.
+   Mobile layout is intentionally untouched.
+   ========================================================= */
+
+@media (min-width: 901px) {
+    .stage-hud--bar {
+        top: 22px;
+        right: clamp(28px, 4vw, 64px);
+        left: clamp(28px, 4vw, 64px);
+        width: auto;
+        max-width: none;
+    }
+
+    .stage-pill--brand {
+        display: grid;
+        grid-template-columns: minmax(235px, auto) minmax(300px, 1fr) minmax(330px, auto);
+        align-items: center;
+        width: 100%;
+        min-height: 0;
+        padding: 0;
+        gap: clamp(18px, 3vw, 48px);
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        backdrop-filter: none;
+    }
+
+    .stage-pill--brand .console-dots {
+        display: none;
+    }
+
+    /* Independent brand island. */
+    .stage-pill--brand .brand {
+        grid-column: 1;
+        display: flex;
+        align-items: center;
+        min-width: 0;
+        min-height: 66px;
+        padding: 10px 18px 10px 12px;
+        justify-self: start;
+        background: color-mix(in srgb, var(--panel) 92%, transparent);
+        border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--line));
+        border-radius: 19px;
+        box-shadow: 0 14px 34px color-mix(in srgb, var(--text) 12%, transparent);
+        backdrop-filter: blur(20px) saturate(1.08);
+    }
+
+    .stage-hud--bar .brand-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 13px;
+        font-size: 22px;
+    }
+
+    .stage-hud--bar .brand-name {
+        font-size: 21px;
+        letter-spacing: -1.1px;
+    }
+
+    .stage-hud--bar .brand-subtitle {
+        margin-top: 3px;
+        color: var(--accent);
+        font-size: 8px;
+        font-weight: 900;
+        letter-spacing: 1.45px;
+    }
+
+    /* Independent navigation island. */
+    .stage-pill--brand .main-nav {
+        grid-column: 2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        justify-self: center;
+        min-width: max-content;
+        margin: 0;
+        padding: 5px;
+        gap: 3px;
+        background: color-mix(in srgb, var(--panel) 90%, transparent);
+        border: 1px solid color-mix(in srgb, var(--accent) 14%, var(--line));
+        border-radius: 16px;
+        box-shadow: 0 12px 30px color-mix(in srgb, var(--text) 10%, transparent);
+        backdrop-filter: blur(18px) saturate(1.06);
+    }
+
+    .stage-pill--brand .nav-link {
+        padding: 10px 14px;
+        color: var(--text-soft);
+        border-radius: 10px;
+        font-size: 10px;
+        font-weight: 850;
+        letter-spacing: .3px;
+        transition: color var(--speed) var(--ease), background var(--speed) var(--ease), transform var(--speed) var(--ease);
+    }
+
+    .stage-pill--brand .nav-link--active,
+    .stage-pill--brand button.nav-link:hover {
+        color: var(--accent-ink);
+        background: var(--accent);
+        box-shadow: 0 7px 16px var(--accent-glow);
+    }
+
+    .stage-pill--brand button.nav-link:hover {
+        transform: translateY(-1px);
+    }
+
+    /* Independent status island. Keep labels readable and give the theme
+       control its own breathing room instead of packing everything together. */
+    .stage-pill--brand .console-actions {
+        grid-column: 3;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        min-width: 0;
+        margin: 0;
+        padding: 9px 10px 9px 13px;
+        gap: 10px;
+        flex-wrap: nowrap;
+        background: color-mix(in srgb, var(--panel) 92%, transparent);
+        border: 1px solid color-mix(in srgb, var(--accent) 15%, var(--line));
+        border-radius: 17px;
+        box-shadow: 0 12px 30px color-mix(in srgb, var(--text) 10%, transparent);
+        backdrop-filter: blur(18px) saturate(1.06);
+    }
+
+    .stage-pill--brand .ai-badge,
+    .stage-pill--brand .online-status,
+    .stage-pill--brand .eco-badge {
+        flex: 0 1 auto;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .stage-pill--brand .ai-badge {
+        max-width: 142px;
+        padding-inline: 9px;
+    }
+
+    .stage-pill--brand .online-status {
+        max-width: 124px;
+    }
+
+    .stage-pill--brand .eco-badge {
+        max-width: 120px;
+    }
+
+    .stage-pill--brand .theme-toggle {
+        flex: 0 0 40px;
+        margin-left: 2px;
+    }
+
+    /* Lower the hero slightly so the eyebrow does not read as part of the
+       header and remains visually separated from the top islands. */
+    .hero-copy {
+        top: 56%;
+    }
+}
+
+@media (min-width: 901px) and (max-width: 1180px) {
+    .stage-hud--bar {
+        right: 22px;
+        left: 22px;
+    }
+
+    .stage-pill--brand {
+        grid-template-columns: minmax(190px, auto) minmax(240px, 1fr) minmax(250px, auto);
+        gap: 12px;
+    }
+
+    .stage-pill--brand .brand {
+        padding-right: 12px;
+    }
+
+    .stage-pill--brand .main-nav {
+        gap: 1px;
+    }
+
+    .stage-pill--brand .nav-link {
+        padding-inline: 9px;
+        font-size: 9px;
+    }
+
+    .stage-pill--brand .ai-badge {
+        max-width: 96px;
+    }
+
+    .stage-pill--brand .online-status {
+        max-width: 96px;
+        font-size: 9px;
+    }
+
+    .stage-pill--brand .eco-badge {
+        max-width: 92px;
+        padding-inline: 6px;
+        font-size: 8px;
+    }
+}
+
+
+/* =========================================================
+   DESKTOP STATUS LABELS — KEEP FULL TEXT VISIBLE
+   Desktop only. Mobile status behavior remains unchanged.
+   ========================================================= */
+
+@media (min-width: 901px) {
+    .stage-pill--brand {
+        grid-template-columns: minmax(235px, auto) minmax(280px, 1fr) max-content;
+    }
+
+    .stage-pill--brand .console-actions {
+        width: max-content;
+        max-width: none;
+        overflow: visible;
+        white-space: nowrap;
+    }
+
+    .stage-pill--brand .ai-badge,
+    .stage-pill--brand .online-status,
+    .stage-pill--brand .eco-badge {
+        max-width: none;
+        overflow: visible;
+        text-overflow: clip;
+        white-space: nowrap;
+        flex: 0 0 auto;
+    }
+}
+
+@media (min-width: 901px) and (max-width: 1180px) {
+    .stage-pill--brand {
+        grid-template-columns: minmax(190px, auto) minmax(220px, 1fr) max-content;
+        gap: 10px;
+    }
+
+    .stage-pill--brand .console-actions {
+        gap: 7px;
+        padding-inline: 9px;
+    }
+
+    .stage-pill--brand .ai-badge,
+    .stage-pill--brand .online-status,
+    .stage-pill--brand .eco-badge {
+        font-size: 8px;
+        letter-spacing: .7px;
+    }
+}
+
+
+/* =========================================================
+   PUHTO VISUAL CLARITY — DESKTOP
+   Keeps the AI bot solid, detailed and readable without changing
+   its geometry, animation or AI behavior. Mobile remains untouched.
+   ========================================================= */
+
+@media (min-width: 901px) {
+    /* Let the rendered bot carry real colour and edge definition. */
+    .robot-container {
+        opacity: 1;
+        filter: saturate(1.16) contrast(1.12) brightness(.98);
+    }
+
+    .robot-container canvas {
+        opacity: 1;
+        filter: saturate(1.12) contrast(1.08);
+    }
+
+    /* Replace the heavy white veil with a controlled readability gradient:
+       the hero gets its own solid surface below, while Puhto remains clear
+       through the open center of the stage. */
+    .robot-section::after {
+        background:
+            linear-gradient(90deg,
+                color-mix(in srgb, var(--bg) 48%, transparent) 0%,
+                color-mix(in srgb, var(--bg) 22%, transparent) 30%,
+                color-mix(in srgb, var(--bg) 5%, transparent) 54%,
+                transparent 76%),
+            linear-gradient(180deg,
+                color-mix(in srgb, var(--bg) 8%, transparent) 0%,
+                transparent 34%,
+                color-mix(in srgb, var(--bg) 12%, transparent) 100%);
+    }
+
+    /* The hero copy gets a proper opaque reading surface instead of relying
+       on a full-screen transparent wash that hides the robot. */
+    .hero-copy {
+        isolation: isolate;
+        padding: 26px 30px 28px;
+        border: 1px solid color-mix(in srgb, var(--accent) 14%, var(--line));
+        border-radius: 24px;
+        background: color-mix(in srgb, var(--panel) 94%, transparent);
+        box-shadow: 0 22px 56px color-mix(in srgb, var(--text) 14%, transparent);
+        backdrop-filter: blur(16px) saturate(1.04);
+    }
+
+    .hero-copy .hero-eyebrow,
+    .hero-copy h1,
+    .hero-copy .hero-lead,
+    .hero-copy .hero-actions,
+    .hero-copy .hero-trust,
+    .hero-copy .service-area-note {
+        position: relative;
+        z-index: 1;
+    }
+
+    .hero-copy h1 {
+        text-shadow: 0 2px 0 color-mix(in srgb, var(--surface) 42%, transparent);
+    }
+
+    /* Keep the bot readable behind the order workspace as well. */
+    body[data-app-state="request"] .robot-section::after {
+        background:
+            linear-gradient(90deg,
+                color-mix(in srgb, var(--bg) 34%, transparent) 0%,
+                color-mix(in srgb, var(--bg) 10%, transparent) 48%,
+                color-mix(in srgb, var(--bg) 8%, transparent) 100%),
+            linear-gradient(180deg,
+                color-mix(in srgb, var(--bg) 8%, transparent) 0%,
+                transparent 42%,
+                color-mix(in srgb, var(--bg) 14%, transparent) 100%);
+    }
+}
+
+@media (min-width: 901px) and (max-width: 1180px) {
+    .hero-copy {
+        padding: 22px 24px 24px;
+        border-radius: 21px;
+    }
+}

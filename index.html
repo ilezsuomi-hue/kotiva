@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="fi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
+    <meta id="meta-theme-color" name="theme-color" content="#f4f7f5">
+    <meta name="color-scheme" content="light dark">
+    <meta name="description" content="kotiva tuo noudot ja toimitukset kotiovelle. Tilaa kuljetus, lähetä paketti tai pyydä kauppakyyti helposti.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%231b6b59'/%3E%3Cpath d='M16 34 32 19l16 15v15H16V34Z' fill='%23f1fbf6'/%3E%3Cpath d='M25 49V37h14v12' fill='%237bc9aa'/%3E%3C/svg%3E">
+    <title>kotiva — Nouto ja toimitus, kun tarvitset</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+
+    <script>
+        /* Keep the first paint in sync with the saved desktop preference. */
+        (function () {
+            var theme = "light";
+            var isMobile = window.matchMedia("(max-width: 900px)").matches;
+            try {
+                var stored = localStorage.getItem("kotiva_theme") || localStorage.getItem("puhtola_theme");
+                if (!isMobile && (stored === "dark" || stored === "light")) theme = stored;
+            } catch (error) {
+                /* Private mode or blocked storage: keep the default. */
+            }
+            if (isMobile) theme = "dark";
+            document.documentElement.dataset.theme = theme;
+            var themeMeta = document.getElementById("meta-theme-color");
+            if (themeMeta) themeMeta.content = theme === "dark" ? "#102b2b" : "#f4f7f5";
+        })();
+    </script>
+</head>
+
+<body data-app-state="start">
+<div class="app">
+    <main class="main">
+        <section class="robot-section" aria-label="kotiva-palvelu">
+            <div id="robot-container" class="robot-container"></div>
+
+            <div class="stage-hud stage-hud--bar">
+                <div class="stage-pill stage-pill--brand">
+                    <span class="console-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                    <div class="brand">
+                        <div class="brand-icon">k</div>
+                        <div class="brand-info">
+                            <div class="brand-name">kotiva</div>
+                            <div class="brand-subtitle">NOUTOJA &amp; TOIMITUKSIA</div>
+                        </div>
+                    </div>
+                    <nav class="main-nav" aria-label="Päänavigaatio">
+                        <button id="nav-order-button" class="nav-link nav-link--active" type="button">Tilaa kuljetus</button>
+                        <span class="nav-link">Yrityksille</span>
+                        <span class="nav-link">Seuraa tilausta</span>
+                    </nav>
+                    <div class="console-actions">
+                        <span id="ai-badge" class="ai-badge" title="Kotivan digitaalinen avustaja"><i class="dot"></i><span id="ai-badge-text">AVUSTAJA VALMISTAUTUU</span></span>
+                        <span class="online-status"><span class="online-dot"></span>SAATAVILLA NYT</span>
+                        <span class="eco-badge" title="Paikalliset kuljettajat ja reitit"><span aria-hidden="true">✦</span>PAIKALLINEN</span>
+                        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Vaihda vaalea ja tumma tila" title="Vaihda vaalea ja tumma tila">☀️</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stage-hud stage-hud--hint">
+                <p class="stage-hint">Tutustu kotivaan · nopea nouto · selkeä hinta</p>
+            </div>
+
+            <div id="start-overlay" class="start-overlay" aria-label="Tilaa kuljetus" aria-hidden="false">
+                <div class="hero-copy">
+                    <p class="hero-eyebrow"><span class="hero-eyebrow-dot"></span> Kuljetuspalvelu, joka toimii kaupungissasi</p>
+                    <h1>Arki liikkuu<br><em>kotivan kanssa.</em></h1>
+                    <p class="hero-lead">Tilaa nouto, lähetä paketti tai pyydä ostokset kotiovelle. Kotiva yhdistää sinut lähimpään kuljettajaan — helposti ja ilman turhaa säätöä.</p>
+                    <div class="hero-actions">
+                        <button id="start-booking-button" class="start-button" type="button" aria-controls="assistant-panel" aria-expanded="false">Tilaa kuljetus <span aria-hidden="true">↗</span></button>
+                        <span class="hero-caption">Arvioitu nouto jopa 30 minuutissa</span>
+                    </div>
+                    <div class="hero-trust" aria-label="Kotivan lupaukset">
+                        <div><strong>9 €</strong><span>alkaen</span></div>
+                        <div><strong>30 min</strong><span>nopea nouto</span></div>
+                        <div><strong>24/7</strong><span>tilaus verkossa</span></div>
+                    </div>
+                    <p class="service-area-note"><span aria-hidden="true">⌖</span> Palvelemme Helsingissä, Espoossa ja Vantaalla.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="assistant-panel" class="assistant-panel hidden" aria-hidden="true">
+            <div class="console-window">
+                <div class="assistant-heading">
+                    <div><span class="eyebrow">KOTIVA · TILAUS</span><h2>Tilaa kuljetus</h2></div>
+                    <span class="assistant-live"><i></i> Saatavilla nyt</span>
+                </div>
+
+                <div class="wizard-steps" role="list" aria-label="Tilauksen vaiheet">
+                    <div class="wizard-step active" data-step="1" role="listitem" aria-current="step"><i aria-hidden="true">1</i><span>PALVELU</span></div>
+                    <div class="wizard-step" data-step="2" role="listitem"><i aria-hidden="true">2</i><span>REITTI</span></div>
+                    <div class="wizard-step" data-step="3" role="listitem"><i aria-hidden="true">3</i><span>AIKA</span></div>
+                </div>
+
+                <div class="conversation">
+                    <div id="user-message" class="user-message"></div>
+                    <div class="speech-card"><div id="assistant-message" aria-live="polite" class="assistant-message">Hei! Olen kotivan avustaja. Valitse palvelu, niin järjestetään nouto sinulle.</div></div>
+                </div>
+
+                <div class="console-body">
+                    <div id="confirmation" class="confirmation hidden">
+                        <div class="confirmation-card">
+                            <div class="success-icon">✓</div>
+                            <span class="eyebrow">TILAUS VASTAANOTETTU</span>
+                            <h2>Kuljetuspyyntö lähti</h2>
+                            <p id="confirmation-text"></p>
+                            <button id="close-confirmation" class="confirm-button" type="button">UUSI TILAUS</button>
+                        </div>
+                    </div>
+
+                    <div id="service-panel" class="service-panel wizard-pane" data-pane="1">
+                        <div class="panel-kicker">Mitä haluat liikuttaa?</div>
+                        <div class="panel-title">Valitse kuljetustarve</div>
+                        <div class="service-grid">
+                            <button class="service-button" data-service="Pikatoimitus" data-label="pikatoimituksen" type="button" aria-pressed="false">
+                                <span class="service-icon">⚡</span><span class="service-content"><strong>Pikatoimitus</strong><small>Ovelta ovelle, heti kun tarvitset</small><span class="service-price">ALKAEN 9 €</span></span><span class="service-arrow">→</span>
+                            </button>
+                            <button class="service-button" data-service="Pakettikuljetus" data-label="pakettikuljetuksen" type="button" aria-pressed="false">
+                                <span class="service-icon">▣</span><span class="service-content"><strong>Pakettikuljetus</strong><small>Lähetä paketti turvallisesti</small><span class="service-price">ALKAEN 12 €</span></span><span class="service-arrow">→</span>
+                            </button>
+                            <button class="service-button" data-service="Kauppakyyti" data-label="kauppakyydin" type="button" aria-pressed="false">
+                                <span class="service-icon">✦</span><span class="service-content"><strong>Kauppakyyti</strong><small>Ostokset kaupasta kotiin</small><span class="service-price">ALKAEN 15 €</span></span><span class="service-arrow">→</span>
+                            </button>
+                            <button class="service-button" data-service="Yrityskuljetus" data-label="yrityskuljetuksen" type="button" aria-pressed="false">
+                                <span class="service-icon">⌁</span><span class="service-content"><strong>Yrityskuljetus</strong><small>Toistuvat toimitukset yrityksille</small><span class="service-price">SOPIMUSHINTA</span></span><span class="service-arrow">→</span>
+                            </button>
+                        </div>
+                        <div class="selection-trust"><span>✓ Hinta ennen vahvistusta</span><span>✓ Seuranta matkalla</span></div>
+                    </div>
+
+                    <div id="booking-panel" class="booking-panel hidden" aria-hidden="true">
+                        <div id="wizard-pane-2" class="wizard-pane" data-pane="2">
+                            <div class="panel-kicker">Askel 2 / 3</div><div class="panel-title">Mistä ja minne?</div>
+                            <div class="route-intro"><span class="route-line"></span><p>Anna nouto- ja toimitusosoite. Kuljettaja näkee reitin heti.</p></div>
+                            <label for="booking-service">PALVELU</label><input id="booking-service" readonly>
+                            <label for="customer-name">NIMESI</label><input id="customer-name" type="text" autocomplete="name" enterkeyhint="next" placeholder="Etunimi ja sukunimi">
+                            <label for="customer-phone">PUHELINNUMERO</label><input id="customer-phone" type="tel" inputmode="tel" autocomplete="tel" enterkeyhint="next" placeholder="+358 40 123 4567">
+                            <div class="address-pair"><div><label for="booking-address">NOUTO-OSOITE</label><input id="booking-address" type="text" autocomplete="street-address" enterkeyhint="next" placeholder="Esim. Mannerheimintie 1, Helsinki"></div><div><label for="booking-dropoff">TOIMITUSOSOITE</label><input id="booking-dropoff" type="text" autocomplete="street-address" enterkeyhint="next" placeholder="Mihin toimitetaan?"></div></div>
+                            <div class="route-actions"><button id="calculate-route" class="route-button" type="button"><span aria-hidden="true">⌖</span> LASKE REITTI &amp; HINTA</button><span id="route-status" class="route-status" role="status" aria-live="polite">Syötä molemmat osoitteet.</span></div>
+                            <div id="route-map-shell" class="route-map-shell hidden"><div id="route-map" class="route-map" role="img" aria-label="Kartta nouto- ja toimitusreitistä"></div><div class="map-attribution-note">© OpenStreetMap contributors</div></div>
+                            <div id="route-summary" class="route-summary hidden"><div><span>REITTI</span><strong id="route-distance">—</strong></div><div><span>ARVIOITU AIKA</span><strong id="route-duration">—</strong></div><div><span>HINTA</span><strong id="route-price">—</strong></div></div>
+                            <label for="booking-email">SÄHKÖPOSTI <span class="label-optional">(VALINNAINEN)</span></label><input id="booking-email" type="email" inputmode="email" autocomplete="email" placeholder="Vahvistusta varten">
+                            <label for="booking-size">LÄHETYKSEN KOKO</label><select id="booking-size"><option value="Pieni lähetys (max 5 kg)">Pieni lähetys (max 5 kg)</option><option value="Keskikokoinen lähetys (max 15 kg)" selected>Keskikokoinen lähetys (max 15 kg)</option><option value="Iso lähetys (max 30 kg)">Iso lähetys (max 30 kg)</option><option value="Useampi paketti">Useampi paketti</option></select>
+                            <div class="wizard-nav"><button id="wizard-back-2" class="wizard-back" type="button">← TAKAISIN</button><button id="wizard-next-2" class="confirm-button" type="button">JATKA →</button></div>
+                        </div>
+                        <div id="wizard-pane-3" class="wizard-pane hidden" data-pane="3">
+                            <div class="panel-kicker">Askel 3 / 3</div><div class="panel-title">Milloin noudetaan?</div>
+                            <div class="time-note"><span aria-hidden="true">◷</span><p>Valitse sinulle sopiva aikaikkuna. Näet hinnan ja vahvistuksen ennen tilausta.</p></div>
+                            <label for="booking-date">PÄIVÄMÄÄRÄ</label><input id="booking-date" type="date">
+                            <label for="booking-time">VAPAA AIKAIKKUNA</label><select id="booking-time"><option value="">Valitse aika</option></select>
+                            <label for="booking-notes">LISÄTIEDOT <span class="label-optional">(VALINNAINEN)</span></label><textarea id="booking-notes" rows="3" maxlength="300" placeholder="Esim. ovikoodi, herkkä paketti tai muu huomio"></textarea>
+                            <div class="price-preview"><span>Arvioitu toimitus</span><strong id="price-preview-value">—</strong></div>
+                            <div class="honeypot" aria-hidden="true"><label>Yritys</label><input id="booking-website" type="text" tabindex="-1" autocomplete="off"></div>
+                            <div class="wizard-nav"><button id="wizard-back-3" class="wizard-back" type="button">← TAKAISIN</button><button id="confirm-booking" class="confirm-button" type="button">VAHVISTA TILAUS</button></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="console-dock">
+                    <div class="quick-rail hidden" role="group" aria-label="Palvelun vaihto"><span class="quick-label">VAIHDA</span>
+                        <button class="quick-chip" data-quick="Pikatoimitus" data-label="pikatoimituksen" type="button"><span class="quick-icon">⚡</span><span>Pikatoimitus</span></button>
+                        <button class="quick-chip" data-quick="Pakettikuljetus" data-label="pakettikuljetuksen" type="button"><span class="quick-icon">▣</span><span>Paketti</span></button>
+                        <button class="quick-chip" data-quick="Kauppakyyti" data-label="kauppakyydin" type="button"><span class="quick-icon">✦</span><span>Kauppakyyti</span></button>
+                        <button class="quick-chip" data-quick="Yrityskuljetus" data-label="yrityskuljetuksen" type="button"><span class="quick-icon">⌁</span><span>Yrityksille</span></button>
+                    </div>
+                    <div class="controls"><button id="microphone-button" class="mic-button" type="button"><span class="mic-icon">◉</span><span>KYSY KOTIVAA</span></button><button id="greeting-button" class="secondary-button" type="button"><span class="btn-ico">✦</span><span class="btn-txt">TERVE</span></button><button id="mute-button" class="secondary-button" type="button" aria-label="Kytke ääni päälle tai pois"><span class="btn-ico">◒</span><span class="btn-txt">ÄÄNI</span></button></div>
+                    <div class="chat-row"><input id="text-input" type="text" autocomplete="off" enterkeyhint="send" placeholder="Kysy kuljetuksesta..."><button id="send-button" class="send-button" type="button">LÄHETÄ</button></div>
+                    <div id="mic-status" class="mic-status" role="status" aria-live="polite">Kerro, mitä haluat kuljettaa.</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script type="importmap">
+    {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"}}
+    </script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script type="module" src="app.js"></script>
+</div>
+</body>
+</html>

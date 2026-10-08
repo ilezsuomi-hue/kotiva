@@ -1,0 +1,11 @@
+node_modules/
+.env
+.env.*
+!.env.example
+*.zip
+*.log
+preview*.png
+shot-*.png
+tmp-*.mjs
+tmp-*.log
+.DS_Store

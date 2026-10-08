@@ -1,0 +1,19 @@
+{
+  "name": "kotiva",
+  "version": "1.0.0",
+  "description": "kotiva - Finnish on-demand pickup and delivery marketplace with a 3D assistant and guided order flow. 'three' is a devDependency used only for the Node smoke test.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "node server.mjs",
+    "serve": "node server.mjs",
+    "build": "node build.mjs",
+    "start": "node server.mjs",
+    "test": "node test-robot.mjs"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "three": "^0.180.0"
+  }
+}
+
