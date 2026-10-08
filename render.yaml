@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: kotiva-web
+    name: kotiva2026noutopalvelu
     runtime: node
     region: frankfurt
     plan: free
